@@ -16,6 +16,7 @@ This function calls int_to_u2() and prints the result for each number in the ran
 """
 from math import ceil
 
+
 def int_to_u2(decimal: int, bits=8) -> str:
     """
     This function converts an integer to its binary and hexadecimal representation in the format
@@ -55,4 +56,4 @@ def main(bits=8):
 
 
 if __name__ == "__main__":
-    main(3)
+    main(8)
