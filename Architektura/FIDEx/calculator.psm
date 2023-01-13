@@ -1,0 +1,263 @@
+; *****************************************************************************************************************************
+; \navGrpBegin "Directives"
+; *****************************************************************************************************************************
+
+	; *************************************************************************************************************************
+	; !!! The set directives overwrites the configuration dialog settings !!!
+	; *************************************************************************************************************************
+
+	; *************************************************************************************************************************
+	;  \navSep "Editor config"
+	; *************************************************************************************************************************
+		#set editor::tabIndent,							4
+
+	; *************************************************************************************************************************
+	; \navSep "Xilinx PicoBlaze core configuration"
+	; *************************************************************************************************************************
+		#ifDef proc::xPblze6
+	
+			#set proc::xPblze6::scrpdSize,				64						; [64, 128, 256]
+;			#set proc::xPblze6::scrpdioDev,				ioDev::yourDev
+			#set proc::xPblze6::intVector,				1023					; [0 to 4095]
+			#set proc::xPblze6::clkFreq,				80000000					; in Hz
+			
+		#elseIf proc::xPblze3
+	
+;			#set proc::XPblze3::scrpdioDev,				ioDev::yourDev
+			#set proc::XPblze3::clkFreq,				80000000					; in Hz
+		#endIf
+		
+	; *************************************************************************************************************************
+	;  \navSep "Instruction memory config"
+	; *************************************************************************************************************************
+		#set instmem::pageSize,							1024
+		#set instmem::pageCount,						1
+;		#set instmem::sharedMemLocation,				hiMem					; [ hiMem, loMem ]
+
+	; *************************************************************************************************************************
+	;  \navSep "ioDevice for instruction memory"
+	; *************************************************************************************************************************
+		#set ioDev::page0::en,							true					; [ true | false ]
+		#set ioDev::page0::type,						mem						; [ mem | fifo | reg ]
+		#set ioDev::page0::size,						1024					; Multiple of 2
+		#set ioDev::page0::baseAddr,					0x00
+		#set ioDev::page0::simEn,						false					; Enabling IO device in simulator
+; 		#set ioDev::page0::simAccessMode,				rd						; [ rdWr, rd, wr ]
+	
+		#set ioDev::page0::initValue,					0x00000					; Initial value
+	
+;		#set ioDev::page0::value,						0x33, 0x44, 0x55
+;		#set ioDev::page0::value,						0x10: 0x33, 0x44, 0x55
+;		#set ioDev::page0::value,						0x01: 0x33
+;		#set ioDev::page0::value,						0x02: 0x44
+; 		#set ioDev::page0::value,						append: 0x33, 0x44, 0x55
+; 		#set ioDev::page0::value,						append: 0x66, 0x77, 0x88
+
+		#set ioDev::page0::value,						instMem
+;		#set ioDev::page0::value,						instMem[page0]
+;		#set ioDev::page0::value,						instMem[0..1023]
+;		#set ioDev::page0::value,						instMem[page0][7..0]
+;		#set ioDev::page0::value,						instMem[0..1023][7..0]
+;		#set ioDev::page0::value,						instMem[1023..0]
+	
+	
+;		#set ioDev::page0::vhdlEn,						true					; Enable/disable vhdl output
+;		#set ioDev::page0::vhdlEntityName,				"vhdlPblzeRom"			; VHDL entity name
+;		#set ioDev::page0::vhdlTmplFile,				"tmpl.vhd"				; VHDL template file
+;		#set ioDev::page0::vhdlTargetFile,				"out.vhd"				; VHDL target file
+	
+;		#set ioDev::page0::verilogEn,					true					; Enable/disable verilog output
+;		#set ioDev::page0::verilogEntityName,			"verilogPblzeRom"		; VHDL entity name
+;		#set ioDev::page0::verilogTmplFile,				"tmpl.v"					; VHDL template file
+;		#set ioDev::page0::verilogTargetFile,			"out.v"					; VHDL target file
+	
+;		#set ioDev::page0::hexEn,						true					; Enable/disable hex output
+;		#set ioDev::page0::hexTargetFile,				"out.hex"				; Hex target file
+	
+;		#set ioDev::page0::memEn,						true					; Enable/disable mem output
+;		#set ioDev::page0::memTargetFile,				"out.mem"				; Mem target file
+;		#set ioDev::page0::memGapStuffing,				true					; Mem gap stuffing enable: [ true | false ]
+
+	; *************************************************************************************************************************
+	; \navSep "rxFIFO"
+	;
+	; Setting up a small FIFO for simulation purposes.
+	; *************************************************************************************************************************
+	
+		; rxFIFO data
+		#set ioDev::rxFIFO::en,					true					; [ true | false ]
+		#set ioDev::rxFIFO::type,				fifo					; [ mem | fifo | reg ]
+		#set ioDev::rxFIFO::size,				32						; Multiple of 2
+		#set ioDev::rxFIFO::baseAddr,			0x20
+		#set ioDev::rxFIFO::simEn,				true					; Enabling IO device in simulator
+		#set ioDev::rxFIFO::simAccessMode,		rd						; [ rdWr, rd, wr ]
+	
+		#set ioDev::rxFIFO::initValue,			0x00000					; Initial value
+
+		#set ioDev::rxFIFO::value,				append: 0x01, 0x89, 0x8d, 0x8a, 0xe7, 0xc0, 0xa0, 0x04
+		#set ioDev::rxFIFO::value,				append: 0x01, 0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x04
+
+	; *************************************************************************************************************************
+	; \navHw "Register renaming"
+	; *************************************************************************************************************************
+		#equ reg_work, 			sF
+	
+	; *************************************************************************************************************************
+	; \navHw "Port addresses"
+	; *************************************************************************************************************************
+		#equ busAddr_intReg,	0x01
+		#equ busAddr_dbg,		0xFF
+		
+		; zaczynam od 0x02, poniewaz na gorze 0x01 jest juz zajety
+		; adresy portow zaczynajace sie od 0 to instrukcja add
+		#equ add_plus_minus,    0x02; add +- = sub ++
+		#equ add_minus_plus,    0x03; add -+ = sub --
+		#equ add_plus_plus,     0x04; add ++ = sub +-
+		#equ add_minus_minus,   0x05; add -- = sub -+
+		
+		; adresy portow zaczynajace sie od 1 to instrukcja sub
+		#equ sub_plus_plus,     0x12; sub ++ = add +-
+		#equ sub_minus_minus,   0x13; sub -- = add -+
+		#equ sub_plus_minus,    0x14; sub +- = add ++
+		#equ sub_minus_plus,    0x15; sub -+ = add --
+
+; *****************************************************************************************************************************
+; \navGrpEnd
+; \navGrpBegin "Sources"
+; *****************************************************************************************************************************
+
+; *****************************************************************************************************************************
+; Main function
+; *****************************************************************************************************************************
+
+; rejestry maja 8 bit'ow
+; w U2 daje to od -128..127
+; bit znaku wiec bedzie mial wartosc 128
+; a ze najwieksza wartosc pozytywna to 127
+; to kazda "wieksza" liczba od tego jest ujemna
+; np. +1 = 0000 0001
+; na U2 to
+; 1. 1111 1110
+; 		    +1
+; 2. 1111 1111
+; bez U2 przeczytalibysmy to jako 255
+; a tak to na 8 miejscu jest bit znaku ktory ma wartosc 128
+; przeliczanie U2: https://www.kalkmat.pl/Decimal/U2
+
+					; wlacz silnik przerywan
+					int enable
+main:				
+					jump add_p_m
+reset_values:		
+					load s0, 0x00
+					load s1, 0x00
+					load s2, 0x00
+					load s3, 0x00
+					load s4, 0x00
+					load s5, 0x00
+					load s6, 0x00
+					load s7, 0x00
+					load s8, 0x00
+					load s9, 0x00
+					load sA, 0x00
+					load sB, 0x00
+					load sC, 0x00
+					load sD, 0x00
+					load sE, 0x00
+					load sF, 0x00
+					wrprt sF, sub_minus_plus
+					wrprt sF, add_minus_minus
+					wrprt sF, sub_plus_minus
+					wrprt sF, add_plus_plus
+					wrprt sF, sub_minus_minus
+					wrprt sF, add_minus_plus
+					wrprt sF, sub_plus_plus
+					wrprt sF, add_plus_minus
+					
+					; zmien na alternatywny bank
+					star s0, 0x00
+					jump main
+
+add_p_m:			; add +- -> sub ++
+     				load s0, 0x0A; 10 = 0000 1010
+					load s1, 0xFB; -5 = 1111 1011
+					
+					add s0, s1; 10 + -5 = 10 - 5 = 5
+					wrprt s0, add_plus_minus; = 0x05 = 0000 0101
+					jump sub_p_p
+					
+add_m_p:    		; add -+ -> sub --
+					load s2, 0xFE; -2 = 1111 1110 
+					load s3, 0x0D; 13 = 0000 1101
+					
+					add s2, s3; -2 + 13 = 11
+					wrprt s2, add_minus_plus; = 0x0B = 0000 1011
+					jump sub_m_m
+					
+add_p_p:		    ; add ++ -> sub +-
+					load s4, 0x08; 8 = 0000 1000 
+					load s5, 0x04; 4 = 0000 0100
+					
+					add s4, s5; 8 + 4 = 12
+					wrprt s4, add_plus_plus; = 0x0C = 0000 1100
+					jump sub_p_m
+					
+add_m_m:		    ; add -- -> sub -+
+					load s6, 0xEC; -20 = 1110 1100
+					load s7, 0xE0; -32 = 1110 0000
+					
+					add s6, s7; -20 + -32 = -20 - 32 = -52
+					wrprt s6, add_minus_minus; = 0xCC = 1100 1100
+					jump sub_m_p
+					
+sub_p_p:	   		; sub ++ = add +-
+					load s8, 0x0A; 10 = 0000 1010
+					load s9, 0x05; 5  = 0000 0101
+					
+					sub s8, s9; 10 - +5 = 10 - 5 = 5
+					wrprt s8, sub_plus_plus; = 0x05 = 0000 0101
+					jump add_m_p
+
+sub_m_m:    		; sub -- -> add -+
+					load sA, 0xFE; -2  = 1111 1110 
+					load sB, 0xF3; -13 = 1111 0011
+					
+					sub sA, sB; -2 - -13 = -2 + 13 = 11
+					wrprt sA, sub_minus_minus; = 0x0B = 0000 1011
+					jump add_p_p
+					
+sub_p_m:		    ; sub +- -> add ++
+					load sC, 0x08;  8 = 0000 1000 
+					load sD, 0xFC; -4 = 1111 1100
+					
+					sub sC, sD; 8 - -4 = 8 + 4 = 12
+					wrprt sC, sub_plus_minus; = 0x0C = 0000 1100
+					jump add_m_m
+
+sub_m_p:			; sub -+ -> add -- 
+ 				    load sE, 0xEC; -20 = 1110 1100
+					load sF, 0x20;  32 = 0010 0000
+						
+					sub sE, sF; -20 - 32 = -52
+					wrprt sE, sub_minus_plus; = 0xCC = 1100 1100
+					jump reset_values
+
+; *****************************************************************************************************************************
+; Interrupt service routine
+; *****************************************************************************************************************************
+isr:
+
+					rdPrt	reg_work,	busAddr_intReg
+					wrPrt	reg_work,	busAddr_dbg
+
+					
+					; Do your staff here
+					
+					retI	enable
+
+					#org	addr,		0x3FF
+					jump	isr
+					
+; *****************************************************************************************************************************
+; \navGrpEnd
+; *****************************************************************************************************************************
