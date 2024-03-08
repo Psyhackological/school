@@ -15,3 +15,7 @@ ruff = "^0.3.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["E501", "INP001", "D203", "D213", "D212", "T201"]

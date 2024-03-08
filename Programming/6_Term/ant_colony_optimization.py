@@ -70,7 +70,7 @@ def main(
             ant_route = [next(iter(current_city.keys()))]
             while unvisited_cities:
                 current_city, unvisited_cities = city_select(
-                    pheromone, current_city, unvisited_cities, alpha, beta
+                    pheromone, current_city, unvisited_cities, alpha, beta,
                 )
                 ant_route.append(next(iter(current_city.keys())))
             ant_route.append(0)
@@ -185,7 +185,7 @@ def city_select(
     probabilities = []
     for city in unvisited_cities:
         city_distance = distance(
-            unvisited_cities[city], next(iter(current_city.values()))
+            unvisited_cities[city], next(iter(current_city.values())),
         )
         probability = (pheromone[city][next(iter(current_city.keys()))] ** alpha) * (
             (1 / city_distance) ** beta
@@ -193,7 +193,7 @@ def city_select(
         probabilities.append(probability)
 
     chosen_city_i = random.choices(
-        list(unvisited_cities.keys()), weights=probabilities
+        list(unvisited_cities.keys()), weights=probabilities,
     )[0]
     chosen_city = {chosen_city_i: unvisited_cities[chosen_city_i]}
     del unvisited_cities[next(iter(chosen_city.keys()))]
