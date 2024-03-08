@@ -149,8 +149,7 @@ def pheromone_update(
     for ant_route in ants_route:
         total_distance = 0.0
         for i in range(len(ant_route) - 1):  # Calculate total distance
-            total_distance += distance(cities[ant_route[i]],
-                                       cities[ant_route[i + 1]])
+            total_distance += distance(cities[ant_route[i]], cities[ant_route[i + 1]])
         delta_pheromone = q / total_distance
         for i in range(len(ant_route) - 1):  # Update pheromones
             pheromone[ant_route[i]][ant_route[i + 1]] += delta_pheromone
@@ -211,6 +210,26 @@ def city_select(
     return chosen_city, unvisited_cities
 
 
+def numbers_to_letters(digit):
+    match digit:
+        case 0:
+            return "A"
+        case 1:
+            return "D"
+        case 2:
+            return "F"
+        case 3:
+            return "G"
+        case 4:
+            return "B"
+        case 5:
+            return "E"
+        case 6:
+            return "C"
+        case _:
+            return "?"
+
+
 if __name__ == "__main__":
     best_path, best_distance = main(
         cities=cities,
@@ -221,5 +240,7 @@ if __name__ == "__main__":
         beta=5.0,
         q=10,
     )
+    converted_list_to_letters = list(map(numbers_to_letters, best_path))
+    print(f"{converted_list_to_letters = }")
     print(f"{best_path = }")
     print(f"{best_distance = }")
