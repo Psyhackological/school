@@ -65,8 +65,7 @@ def main(
         ants_route = []
         for _ in range(ants_num):
             unvisited_cities = copy.deepcopy(cities)
-            current_city = {next(iter(cities.keys()))
-                                 : next(iter(cities.values()))}
+            current_city = {next(iter(cities.keys())): next(iter(cities.values()))}
             del unvisited_cities[next(iter(current_city.keys()))]
             ant_route = [next(iter(current_city.keys()))]
             while unvisited_cities:
@@ -140,8 +139,7 @@ def pheromone_update(
     for ant_route in ants_route:
         total_distance = 0.0
         for i in range(len(ant_route) - 1):  # Calculate total distance
-            total_distance += distance(cities[ant_route[i]],
-                                       cities[ant_route[i + 1]])
+            total_distance += distance(cities[ant_route[i]], cities[ant_route[i + 1]])
         delta_pheromone = q / total_distance
         for i in range(len(ant_route) - 1):  # Update pheromones
             pheromone[ant_route[i]][ant_route[i + 1]] += delta_pheromone
