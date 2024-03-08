@@ -14,16 +14,6 @@ Author: Clark
 import copy
 import random
 
-cities = {
-    0: [0, 0],  # A
-    1: [1, 8],  # D
-    2: [2, 10],  # F
-    3: [3, 3],  # G
-    4: [4, 7],  # B
-    5: [6, 4],  # E
-    6: [8, 13],  # C
-}
-
 
 def main(
     cities: dict[int, list[int]],
@@ -75,7 +65,8 @@ def main(
         ants_route = []
         for _ in range(ants_num):
             unvisited_cities = copy.deepcopy(cities)
-            current_city = {next(iter(cities.keys())): next(iter(cities.values()))}
+            current_city = {next(iter(cities.keys()))
+                                 : next(iter(cities.values()))}
             del unvisited_cities[next(iter(current_city.keys()))]
             ant_route = [next(iter(current_city.keys()))]
             while unvisited_cities:
@@ -149,7 +140,8 @@ def pheromone_update(
     for ant_route in ants_route:
         total_distance = 0.0
         for i in range(len(ant_route) - 1):  # Calculate total distance
-            total_distance += distance(cities[ant_route[i]], cities[ant_route[i + 1]])
+            total_distance += distance(cities[ant_route[i]],
+                                       cities[ant_route[i + 1]])
         delta_pheromone = q / total_distance
         for i in range(len(ant_route) - 1):  # Update pheromones
             pheromone[ant_route[i]][ant_route[i + 1]] += delta_pheromone
@@ -231,6 +223,16 @@ def numbers_to_letters(digit):
 
 
 if __name__ == "__main__":
+    cities = {
+        0: [0, 0],  # A
+        1: [1, 8],  # D
+        2: [2, 10],  # F
+        3: [3, 3],  # G
+        4: [4, 7],  # B
+        5: [6, 4],  # E
+        6: [8, 13],  # C
+    }
+
     best_path, best_distance = main(
         cities=cities,
         ants_num=10,
@@ -240,6 +242,7 @@ if __name__ == "__main__":
         beta=5.0,
         q=10,
     )
+
     converted_list_to_letters = list(map(numbers_to_letters, best_path))
     print(f"{converted_list_to_letters = }")
     print(f"{best_path = }")
