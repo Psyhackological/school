@@ -15,14 +15,13 @@ import copy
 import random
 
 cities = {
-    0: [0, 0],
-    1: [0, 5],
-    2: [3, 8],
-    3: [8, 10],
-    4: [12, 8],
-    5: [12, 4],
-    6: [8, 0],
-    7: [6, 2],
+    0: [0, 0],  # A
+    1: [1, 8],  # D
+    2: [2, 10],  # F
+    3: [3, 3],  # G
+    4: [4, 7],  # B
+    5: [6, 4],  # E
+    6: [8, 13],  # C
 }
 
 
@@ -76,8 +75,7 @@ def main(
         ants_route = []
         for _ in range(ants_num):
             unvisited_cities = copy.deepcopy(cities)
-            current_city = {next(iter(cities.keys()))
-                                 : next(iter(cities.values()))}
+            current_city = {next(iter(cities.keys())): next(iter(cities.values()))}
             del unvisited_cities[next(iter(current_city.keys()))]
             ant_route = [next(iter(current_city.keys()))]
             while unvisited_cities:
@@ -223,6 +221,5 @@ if __name__ == "__main__":
         beta=5.0,
         q=10,
     )
-
     print(f"{best_path = }")
     print(f"{best_distance = }")
