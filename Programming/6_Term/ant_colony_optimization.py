@@ -59,7 +59,8 @@ def main(
     """
     # Initialize the pheromone matrix
     # Initialize the pheromone matrix as a dictionary of dictionaries
-    pheromone = {city: {other_city: 1.0 for other_city in cities} for city in cities}
+    pheromone = {city: {other_city: 1.0 for other_city in cities}
+                 for city in cities}
 
     best_path: list[str] = []
     best_distance = float("inf")
@@ -155,13 +156,15 @@ def pheromone_update(
     for ant_route in ants_route:
         total_distance = 0.0
         for i in range(len(ant_route) - 1):  # Calculate total distance
-            total_distance += distance(cities[ant_route[i]], cities[ant_route[i + 1]])
+            total_distance += distance(cities[ant_route[i]],
+                                       cities[ant_route[i + 1]])
 
         delta_pheromone = q / total_distance
 
         for i in range(len(ant_route) - 1):  # Update pheromones
             # Store pheromone values in temporary variables
-            pheromone_value_current_to_next = pheromone[ant_route[i]][ant_route[i + 1]]
+            pheromone_value_current_to_next = pheromone[ant_route[i]
+                                                        ][ant_route[i + 1]]
             pheromone_value_next_to_current = pheromone[ant_route[i + 1]][ant_route[i]]
 
             # Update pheromone values using the temporary variables
@@ -244,11 +247,11 @@ if __name__ == "__main__":
 
     START_CITY = "A"
 
-    best_path, best_distance = main(
+    best_path, best_distance_value = main(
         cities=cities,  # Miasta - Nodes w Grafie
         start_city=START_CITY,  # Miasto poczatkowe - czyli start
-        ants_num=len(cities),  # Liczba mrowek - proporcjonalnie do miast
-        iterations_num=1000,  # Liczba iteracji - dlugosc znajdywania optymalnego rozwiazania
+        ants_num=len(cities) * 2,  # Liczba mrowek - proporcjonalnie do miast
+        iterations_num=1200,  # Liczba iteracji - dlugosc znajdywania optymalnego rozwiazania
         # Wspolczynnik wyparowania feromonu - balansujacy czynnik przy wyborze sciezek
         pheromone_evaporation=0.7,
         alpha=1.0,  # Wplyw feromonu - rownowaga eksploracji i eksploatacji
@@ -256,5 +259,4 @@ if __name__ == "__main__":
         q=10,  # Stala feromonu - ilosc pozostawianego feromonu
     )
 
-    print(f"Best path starting from '{best_path[0]}': {best_path}")
-    print(f"Best distance: {best_distance}")
+    print(f"{best_distance_value} distance for {' -> '.join(best_path)}")
