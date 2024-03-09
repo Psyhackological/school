@@ -56,8 +56,7 @@ def main(
     """
     # Initialize the pheromone matrix
     # Initialize the pheromone matrix as a dictionary of dictionaries
-    pheromone = {city: {other_city: 1.0 for other_city in cities}
-                 for city in cities}
+    pheromone = {city: {other_city: 1.0 for other_city in cities} for city in cities}
 
     best_path: list[str] = []
     best_distance = float("inf")
@@ -66,8 +65,11 @@ def main(
         ants_route = []
         for _ in range(ants_num):
             unvisited_cities = copy.copy(cities)
-            current_city = start_city if start_city in cities else random.choice(
-                list(unvisited_cities.keys()))
+            current_city = (
+                start_city
+                if start_city in cities
+                else random.choice(list(unvisited_cities.keys()))
+            )
             del unvisited_cities[current_city]
             ant_route = [current_city]
 
@@ -149,22 +151,22 @@ def pheromone_update(
     for ant_route in ants_route:
         total_distance = 0.0
         for i in range(len(ant_route) - 1):  # Calculate total distance
-            total_distance += distance(cities[ant_route[i]],
-                                       cities[ant_route[i + 1]])
+            total_distance += distance(cities[ant_route[i]], cities[ant_route[i + 1]])
 
         delta_pheromone = q / total_distance
 
         for i in range(len(ant_route) - 1):  # Update pheromones
             # Store pheromone values in temporary variables
-            pheromone_value_current_to_next = pheromone[ant_route[i]
-                                                        ][ant_route[i + 1]]
+            pheromone_value_current_to_next = pheromone[ant_route[i]][ant_route[i + 1]]
             pheromone_value_next_to_current = pheromone[ant_route[i + 1]][ant_route[i]]
 
             # Update pheromone values using the temporary variables
-            pheromone[ant_route[i]][ant_route[i + 1]
-                                    ] = pheromone_value_current_to_next + delta_pheromone
-            pheromone[ant_route[i + 1]][ant_route[i]
-                                        ] = pheromone_value_next_to_current + delta_pheromone
+            pheromone[ant_route[i]][ant_route[i + 1]] = (
+                pheromone_value_current_to_next + delta_pheromone
+            )
+            pheromone[ant_route[i + 1]][ant_route[i]] = (
+                pheromone_value_next_to_current + delta_pheromone
+            )
 
         if total_distance < best_distance:
             best_path = ant_route
@@ -235,7 +237,7 @@ if __name__ == "__main__":
         "C": (8, 13),
     }
 
-    start_city = 'A'
+    start_city = "A"
 
     best_path, best_distance = main(
         cities=cities,  # Miasta - Nodes w Grafie
