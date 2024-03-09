@@ -18,4 +18,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ["E501", "INP001", "D203", "D213", "D212", "T201"]
+ignore = ["T201", "E501", "D211", "D212", "D400", "PLR0913", "S311", "D415"]

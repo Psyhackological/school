@@ -1,6 +1,6 @@
 """
-Use an ant colony optimization algorithm to solve the travelling salesman problem (TSP)
-which asks the following question:
+Use an ant colony optimization algorithm to solve the travelling salesman problem (TSP) which asks the following question:
+
 "Given a list of cities and the distances between each pair of cities, what is the
  shortest possible route that visits each city exactly once and returns to the origin
  city?"
@@ -8,6 +8,8 @@ which asks the following question:
 https://en.wikipedia.org/wiki/Ant_colony_optimization_algorithms
 https://en.wikipedia.org/wiki/Travelling_salesman_problem
 """
+
+from __future__ import annotations
 
 import copy
 import random
@@ -21,10 +23,11 @@ def main(
     pheromone_evaporation: float,
     alpha: float,
     beta: float,
-    q: float,  # Pheromone system parameters Q，which is a constant
+    q: float,  # Pheromone system parameters Q, which is a constant
 ) -> tuple[list[str], float]:
     """
-    Ant colony algorithm main function
+    Ant colony algorithm main function.
+
     >>> main(cities=cities, ants_num=10, iterations_num=20,
     ...      pheromone_evaporation=0.7, alpha=1.0, beta=5.0, q=10)
     ([0, 1, 2, 3, 4, 5, 6, 7, 0], 37.909778143828696)
@@ -52,7 +55,7 @@ def main(
     ([0, 1, 0], 5.656854249492381)
     >>> main(cities={0: [0, 0], 1: [2, 2]}, ants_num=5, iterations_num=5,
     ...      pheromone_evaporation=0, alpha=1.0, beta=5.0, q=10)
-    ([0, 1, 0], 5.656854249492381)
+    ([0, 1, 0], 5.656854249492381).
     """
     # Initialize the pheromone matrix
     # Initialize the pheromone matrix as a dictionary of dictionaries
@@ -100,13 +103,14 @@ def main(
 
 def distance(city1: tuple[int, int], city2: tuple[int, int]) -> float:
     """
-    Calculate the distance between two coordinate points
+    Calculate the distance between two coordinate points.
+
     >>> distance( (0, 0), (3, 4) )
     5.0
     >>> distance( (0, 0), (-3, 4) )
     5.0
     >>> distance( (0, 0), (-3, -4) )
-    5.0
+    5.0.
     """
     return (((city1[0] - city2[0]) ** 2) + ((city1[1] - city2[1]) ** 2)) ** 0.5
 
@@ -116,13 +120,13 @@ def pheromone_update(
     cities: dict[str, tuple[int, int]],
     pheromone_evaporation: float,
     ants_route: list[list[str]],
-    q: float,  # Pheromone system parameters Q，which is a constant
+    q: float,  # Pheromone system parameters Q, which is a constant
     best_path: list[str],
     best_distance: float,
 ) -> tuple[dict[str, dict[str, float]], list[str], float]:
     """
-    Update pheromones on the route and update the best route
-    >>>
+    Update pheromones on the route and update the best route.
+
     >>> pheromone_update(pheromone=[[1.0, 1.0], [1.0, 1.0]],
     ...                  cities={0: [0,0], 1: [2,2]}, pheromone_evaporation=0.7,
     ...                  ants_route=[[0, 1, 0]], q=10, best_path=[],
@@ -141,7 +145,7 @@ def pheromone_update(
     ...                  best_distance=float("inf"))
     Traceback (most recent call last):
       ...
-    KeyError: 0
+    KeyError: 0.
     """
     for city1 in cities:
         for city2 in cities:
@@ -183,7 +187,8 @@ def city_select(
     beta: float,
 ) -> tuple[str, dict[str, tuple[int, int]]]:
     """
-    Choose the next city for ants
+    Choose the next city for ants.
+
     >>> city_select(pheromone=[[1.0, 1.0], [1.0, 1.0]], current_city={0: [0, 0]},
     ...             unvisited_cities={1: [2, 2]}, alpha=1.0, beta=5.0)
     ({1: [2, 2]}, {})
@@ -201,7 +206,7 @@ def city_select(
     ...             unvisited_cities={}, alpha=1.0, beta=5.0)
     Traceback (most recent call last):
       ...
-    IndexError: list index out of range
+    IndexError: list index out of range.
     """
     probabilities = []
     city_probabilities = {}
@@ -237,11 +242,11 @@ if __name__ == "__main__":
         "C": (8, 13),
     }
 
-    start_city = "A"
+    START_CITY = "A"
 
     best_path, best_distance = main(
         cities=cities,  # Miasta - Nodes w Grafie
-        start_city=start_city,  # Miasto poczatkowe - czyli start
+        start_city=START_CITY,  # Miasto poczatkowe - czyli start
         ants_num=len(cities),  # Liczba mrowek - proporcjonalnie do miast
         iterations_num=1000,  # Liczba iteracji - dlugosc znajdywania optymalnego rozwiazania
         # Wspolczynnik wyparowania feromonu - balansujacy czynnik przy wyborze sciezek
