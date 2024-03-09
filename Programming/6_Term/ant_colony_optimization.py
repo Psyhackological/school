@@ -14,14 +14,15 @@ import random
 
 
 def main(
-    cities: dict[int, list[int]],
+    cities: dict[str, tuple[int, int]],
+    start_city: str,
     ants_num: int,
     iterations_num: int,
     pheromone_evaporation: float,
     alpha: float,
     beta: float,
     q: float,  # Pheromone system parameters Q，which is a constant
-) -> tuple[list[int], float]:
+) -> tuple[list[str], float]:
     """
     Ant colony algorithm main function
     >>> main(cities=cities, ants_num=10, iterations_num=20,
@@ -54,25 +55,32 @@ def main(
     ([0, 1, 0], 5.656854249492381)
     """
     # Initialize the pheromone matrix
-    cities_num = len(cities)
-    pheromone = [[1.0] * cities_num] * cities_num
+    # Initialize the pheromone matrix as a dictionary of dictionaries
+    pheromone = {city: {other_city: 1.0 for other_city in cities}
+                 for city in cities}
 
-    best_path: list[int] = []
+    best_path: list[str] = []
     best_distance = float("inf")
+
     for _ in range(iterations_num):
         ants_route = []
         for _ in range(ants_num):
-            unvisited_cities = copy.deepcopy(cities)
-            current_city = {next(iter(cities.keys()))
-                                 : next(iter(cities.values()))}
-            del unvisited_cities[next(iter(current_city.keys()))]
-            ant_route = [next(iter(current_city.keys()))]
+            unvisited_cities = copy.copy(cities)
+            current_city = start_city if start_city in cities else random.choice(
+                list(unvisited_cities.keys()))
+            del unvisited_cities[current_city]
+            ant_route = [current_city]
+
             while unvisited_cities:
                 current_city, unvisited_cities = city_select(
-                    pheromone, current_city, unvisited_cities, alpha, beta,
+                    pheromone,
+                    current_city,
+                    unvisited_cities,
+                    alpha,
+                    beta,
                 )
-                ant_route.append(next(iter(current_city.keys())))
-            ant_route.append(0)
+                ant_route.append(current_city)
+            ant_route.append(ant_route[0])
             ants_route.append(ant_route)
 
         pheromone, best_path, best_distance = pheromone_update(
@@ -84,31 +92,32 @@ def main(
             best_path,
             best_distance,
         )
+
     return best_path, best_distance
 
 
-def distance(city1: list[int], city2: list[int]) -> float:
+def distance(city1: tuple[int, int], city2: tuple[int, int]) -> float:
     """
     Calculate the distance between two coordinate points
-    >>> distance([0, 0], [3, 4] )
+    >>> distance( (0, 0), (3, 4) )
     5.0
-    >>> distance([0, 0], [-3, 4] )
+    >>> distance( (0, 0), (-3, 4) )
     5.0
-    >>> distance([0, 0], [-3, -4] )
+    >>> distance( (0, 0), (-3, -4) )
     5.0
     """
     return (((city1[0] - city2[0]) ** 2) + ((city1[1] - city2[1]) ** 2)) ** 0.5
 
 
 def pheromone_update(
-    pheromone: list[list[float]],
-    cities: dict[int, list[int]],
+    pheromone: dict[str, dict[str, float]],
+    cities: dict[str, tuple[int, int]],
     pheromone_evaporation: float,
-    ants_route: list[list[int]],
+    ants_route: list[list[str]],
     q: float,  # Pheromone system parameters Q，which is a constant
-    best_path: list[int],
+    best_path: list[str],
     best_distance: float,
-) -> tuple[list[list[float]], list[int], float]:
+) -> tuple[dict[str, dict[str, float]], list[str], float]:
     """
     Update pheromones on the route and update the best route
     >>>
@@ -132,15 +141,18 @@ def pheromone_update(
       ...
     KeyError: 0
     """
-    for a in range(len(cities)):  # Update the volatilization of pheromone on all routes
-        for b in range(len(cities)):
-            pheromone[a][b] *= pheromone_evaporation
+    for city1 in cities:
+        for city2 in cities:
+            pheromone[city1][city2] *= pheromone_evaporation
+
     for ant_route in ants_route:
         total_distance = 0.0
         for i in range(len(ant_route) - 1):  # Calculate total distance
             total_distance += distance(cities[ant_route[i]],
                                        cities[ant_route[i + 1]])
+
         delta_pheromone = q / total_distance
+
         for i in range(len(ant_route) - 1):  # Update pheromones
             pheromone[ant_route[i]][ant_route[i + 1]] += delta_pheromone
             pheromone[ant_route[i + 1]][ant_route[i]] = pheromone[ant_route[i]][
@@ -155,12 +167,12 @@ def pheromone_update(
 
 
 def city_select(
-    pheromone: list[list[float]],
-    current_city: dict[int, list[int]],
-    unvisited_cities: dict[int, list[int]],
+    pheromone: dict[str, dict[str, float]],
+    current_city: str,
+    unvisited_cities: dict[str, tuple[int, int]],
     alpha: float,
     beta: float,
-) -> tuple[dict[int, list[int]], dict[int, list[int]]]:
+) -> tuple[str, dict[str, tuple[int, int]]]:
     """
     Choose the next city for ants
     >>> city_select(pheromone=[[1.0, 1.0], [1.0, 1.0]], current_city={0: [0, 0]},
@@ -183,65 +195,52 @@ def city_select(
     IndexError: list index out of range
     """
     probabilities = []
+    city_probabilities = {}
     for city in unvisited_cities:
         city_distance = distance(
-            unvisited_cities[city], next(iter(current_city.values())),
+            unvisited_cities[city],
+            unvisited_cities[current_city]
+            if current_city in unvisited_cities
+            else cities[current_city],
         )
-        probability = (pheromone[city][next(iter(current_city.keys()))] ** alpha) * (
+        probability = (pheromone[current_city][city] ** alpha) * (
             (1 / city_distance) ** beta
         )
         probabilities.append(probability)
+        city_probabilities[city] = probability
 
-    chosen_city_i = random.choices(
-        list(unvisited_cities.keys()), weights=probabilities,
+    chosen_city = random.choices(
+        list(unvisited_cities.keys()),
+        weights=probabilities,
     )[0]
-    chosen_city = {chosen_city_i: unvisited_cities[chosen_city_i]}
-    del unvisited_cities[next(iter(chosen_city.keys()))]
+    del unvisited_cities[chosen_city]
     return chosen_city, unvisited_cities
-
-
-def numbers_to_letters(digit):
-    match digit:
-        case 0:
-            return "A"
-        case 1:
-            return "D"
-        case 2:
-            return "F"
-        case 3:
-            return "G"
-        case 4:
-            return "B"
-        case 5:
-            return "E"
-        case 6:
-            return "C"
-        case _:
-            return "?"
 
 
 if __name__ == "__main__":
     cities = {
-        0: [0, 0],  # A
-        1: [1, 8],  # D
-        2: [2, 10],  # F
-        3: [3, 3],  # G
-        4: [4, 7],  # B
-        5: [6, 4],  # E
-        6: [8, 13],  # C
+        "A": (0, 0),
+        "D": (1, 8),
+        "F": (2, 10),
+        "G": (3, 3),
+        "B": (4, 7),
+        "E": (6, 4),
+        "C": (8, 13),
     }
+
+    start_city = 'A'
 
     best_path, best_distance = main(
         cities=cities,  # Miasta - Nodes w Grafie
+        start_city=start_city,  # Miasto poczatkowe - czyli start
         ants_num=len(cities),  # Liczba mrowek - proporcjonalnie do miast
-        iterations_num=700,  # Liczba iteracji - dlugosc znajdywania optymalnego rozwiazania
-        pheromone_evaporation=0.6, # Wspolczynnik wyparowania feromonu - balansujacy czynnik przy wyborze sciezek
-        alpha=1.5,  # Wplyw feromonu - rownowaga eksploracji i eksploatacji
-        beta=4.0,  # Wplyw heurestyki - preferuje blizsze miasta
-        q=50,  # Stala feromonu - ilosc pozostawianego feromonu
+        iterations_num=1000,  # Liczba iteracji - dlugosc znajdywania optymalnego rozwiazania
+        # Wspolczynnik wyparowania feromonu - balansujacy czynnik przy wyborze sciezek
+        pheromone_evaporation=0.7,
+        alpha=1.0,  # Wplyw feromonu - rownowaga eksploracji i eksploatacji
+        beta=5.0,  # Wplyw heurestyki - preferuje blizsze miasta
+        q=10,  # Stala feromonu - ilosc pozostawianego feromonu
     )
 
-    converted_list_to_letters = list(map(numbers_to_letters, best_path))
-    print(f"{converted_list_to_letters = }")
-    print(f"{best_path = }")
-    print(f"{best_distance = }")
+    print(f"Best path starting from '{best_path[0]}': {best_path}")
+    print(f"Best distance: {best_distance}")
