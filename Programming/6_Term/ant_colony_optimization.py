@@ -7,8 +7,6 @@ which asks the following question:
 
 https://en.wikipedia.org/wiki/Ant_colony_optimization_algorithms
 https://en.wikipedia.org/wiki/Travelling_salesman_problem
-
-Author: Clark
 """
 
 import copy
@@ -234,13 +232,13 @@ if __name__ == "__main__":
     }
 
     best_path, best_distance = main(
-        cities=cities,
-        ants_num=len(cities) * 2,
-        iterations_num=1000,
-        pheromone_evaporation=0.7,
-        alpha=1.0,
-        beta=5.0,
-        q=10,
+        cities=cities,  # Miasta - Nodes w Grafie
+        ants_num=len(cities),  # Liczba mrowek - proporcjonalnie do miast
+        iterations_num=700,  # Liczba iteracji - dlugosc znajdywania optymalnego rozwiazania
+        pheromone_evaporation=0.6, # Wspolczynnik wyparowania feromonu - balansujacy czynnik przy wyborze sciezek
+        alpha=1.5,  # Wplyw feromonu - rownowaga eksploracji i eksploatacji
+        beta=4.0,  # Wplyw heurestyki - preferuje blizsze miasta
+        q=50,  # Stala feromonu - ilosc pozostawianego feromonu
     )
 
     converted_list_to_letters = list(map(numbers_to_letters, best_path))
