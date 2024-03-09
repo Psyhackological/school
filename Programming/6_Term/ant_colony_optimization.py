@@ -143,7 +143,8 @@ def pheromone_update(
     """
     for city1 in cities:
         for city2 in cities:
-            pheromone[city1][city2] *= pheromone_evaporation
+            current_pheromone = pheromone[city1][city2]
+            pheromone[city1][city2] = current_pheromone * pheromone_evaporation
 
     for ant_route in ants_route:
         total_distance = 0.0
@@ -154,10 +155,16 @@ def pheromone_update(
         delta_pheromone = q / total_distance
 
         for i in range(len(ant_route) - 1):  # Update pheromones
-            pheromone[ant_route[i]][ant_route[i + 1]] += delta_pheromone
-            pheromone[ant_route[i + 1]][ant_route[i]] = pheromone[ant_route[i]][
-                ant_route[i + 1]
-            ]
+            # Store pheromone values in temporary variables
+            pheromone_value_current_to_next = pheromone[ant_route[i]
+                                                        ][ant_route[i + 1]]
+            pheromone_value_next_to_current = pheromone[ant_route[i + 1]][ant_route[i]]
+
+            # Update pheromone values using the temporary variables
+            pheromone[ant_route[i]][ant_route[i + 1]
+                                    ] = pheromone_value_current_to_next + delta_pheromone
+            pheromone[ant_route[i + 1]][ant_route[i]
+                                        ] = pheromone_value_next_to_current + delta_pheromone
 
         if total_distance < best_distance:
             best_path = ant_route
