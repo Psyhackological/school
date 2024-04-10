@@ -73,7 +73,6 @@ def main(
 
 
 def distance(city1: tuple[int, int], city2: tuple[int, int]) -> float:
-    # Pythagorean theorem a^2 + b^2 = c^2
     return (((city1[0] - city2[0]) ** 2) + ((city1[1] - city2[1]) ** 2)) ** 0.5
 
 
@@ -89,31 +88,32 @@ def pheromone_update(
     best_path: list[str],
     best_distance: float,
 ) -> tuple[dict[str, dict[str, float]], list[str], float]:
-    # Evaporate pheromone
+    # Loop through all pairs of cities to reduce their pheromone levels, simulating evaporation
     for city1 in cities:
         for city2 in cities:
             pheromone[city1][city2] *= pheromone_evaporation
 
-    # Update pheromone based on routes taken by ants
+    # For each route that an ant has taken, update the pheromone levels
     for ant_route in ants_route:
-        total_distance = sum(
-            distance(cities[ant_route[i]], cities[ant_route[i + 1]])
-            for i in range(len(ant_route) - 1)
-        )
-        delta_pheromone = q / total_distance  # Calculate the pheromone to be added
-        # Add pheromone to the paths taken by the ant
+        # Calculate the total distance of the current ant's route
+        total_distance = sum(distance(
+            cities[ant_route[i]], cities[ant_route[i + 1]]) for i in range(len(ant_route) - 1))
+
+        # Calculate the amount of pheromone to add to the path, inversely proportional to the route's length
+        delta_pheromone = q / total_distance
+
+        # Loop through the route and add the calculated pheromone to each path the ant traveled
         for i in range(len(ant_route) - 1):
             pheromone[ant_route[i]][ant_route[i + 1]] += delta_pheromone
-            pheromone[ant_route[i + 1]][ant_route[i]] += (
-                delta_pheromone  # Symmetric update
-            )
+            # Also update the reverse path since the graph is undirected (pheromone is added symmetrically)
+            pheromone[ant_route[i + 1]][ant_route[i]] += delta_pheromone
 
-        # Update best path if a better one is found
+        # If the total distance of the current route is shorter than the best known, update the best path and distance
         if total_distance < best_distance:
             best_path = ant_route
             best_distance = total_distance
 
-    # Return updated pheromone, best path, and its distance
+    # Return the updated pheromone levels, the best path found, and its distance
     return pheromone, best_path, best_distance
 
 
