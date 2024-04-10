@@ -1,14 +1,17 @@
 from __future__ import annotations  # For linter satisfaction to annotations
 import copy  # Allows for creating copies of objects
 import random  # Provides functionalities for generating random numbers
+from pprint import pprint as pp  # For pretty printing
+import os  # For working with environement variables
 
 # Main function to run the ant colony optimization
 
 
 def main(
     # Dictionary of cities and their coordinates
+    # Starting city for the ants
     cities: dict[str, tuple[int, int]],
-    start_city: str,  # Starting city for the ants
+    start_city: str,
     ants_num: int,  # Number of ants used in the simulation
     iterations_num: int,  # Number of iterations to perform
     pheromone_evaporation: float,  # Rate at which pheromone evaporates
@@ -31,8 +34,11 @@ def main(
             # Copy of the cities to keep track of unvisited ones
             unvisited_cities = copy.copy(cities)
             # Determine the starting city for the ant
-            current_city = start_city if start_city in cities else random.choice(
-                list(unvisited_cities.keys()))
+            current_city = (
+                start_city
+                if start_city in cities
+                else random.choice(list(unvisited_cities.keys()))
+            )
             # Remove the start city from the unvisited list
             del unvisited_cities[current_city]
             # Initialize the route with the starting city
@@ -41,7 +47,8 @@ def main(
             # Construct the route for the ant
             while unvisited_cities:
                 current_city, unvisited_cities = city_select(
-                    pheromone, current_city, unvisited_cities, alpha, beta)
+                    pheromone, current_city, unvisited_cities, alpha, beta
+                )
                 # Append the selected city to the route
                 ant_route.append(current_city)
             # Complete the tour by returning to the start city
@@ -50,10 +57,17 @@ def main(
 
         # Update the pheromone levels based on the routes taken by the ants
         pheromone, best_path, best_distance = pheromone_update(
-            pheromone, cities, pheromone_evaporation, ants_route, q, best_path, best_distance
+            pheromone,
+            cities,
+            pheromone_evaporation,
+            ants_route,
+            q,
+            best_path,
+            best_distance,
         )
 
     return best_path, best_distance  # Return the best path and its distance
+
 
 # Function to calculate the Euclidean distance between two cities
 
@@ -61,6 +75,7 @@ def main(
 def distance(city1: tuple[int, int], city2: tuple[int, int]) -> float:
     # Pythagorean theorem a^2 + b^2 = c^2
     return (((city1[0] - city2[0]) ** 2) + ((city1[1] - city2[1]) ** 2)) ** 0.5
+
 
 # Function to update the pheromone levels after all ants have completed their routes
 
@@ -81,14 +96,17 @@ def pheromone_update(
 
     # Update pheromone based on routes taken by ants
     for ant_route in ants_route:
-        total_distance = sum(distance(
-            cities[ant_route[i]], cities[ant_route[i + 1]]) for i in range(len(ant_route) - 1))
+        total_distance = sum(
+            distance(cities[ant_route[i]], cities[ant_route[i + 1]])
+            for i in range(len(ant_route) - 1)
+        )
         delta_pheromone = q / total_distance  # Calculate the pheromone to be added
         # Add pheromone to the paths taken by the ant
         for i in range(len(ant_route) - 1):
             pheromone[ant_route[i]][ant_route[i + 1]] += delta_pheromone
-            pheromone[ant_route[i + 1]][ant_route[i]
-                                        ] += delta_pheromone  # Symmetric update
+            pheromone[ant_route[i + 1]][ant_route[i]] += (
+                delta_pheromone  # Symmetric update
+            )
 
         # Update best path if a better one is found
         if total_distance < best_distance:
@@ -97,6 +115,7 @@ def pheromone_update(
 
     # Return updated pheromone, best path, and its distance
     return pheromone, best_path, best_distance
+
 
 # Function to select the next city for an ant based on pheromone levels and distances
 
@@ -113,10 +132,14 @@ def city_select(
     city_probabilities = {}
     for city in unvisited_cities:
         # Calculate probability based on pheromone and distance
-        city_distance = distance(unvisited_cities[current_city], unvisited_cities[city]) if current_city in unvisited_cities else distance(
-            cities[current_city], unvisited_cities[city])
-        probability = (pheromone[current_city][city] **
-                       alpha) * ((1 / city_distance) ** beta)
+        city_distance = (
+            distance(unvisited_cities[current_city], unvisited_cities[city])
+            if current_city in unvisited_cities
+            else distance(cities[current_city], unvisited_cities[city])
+        )
+        probability = (pheromone[current_city][city] ** alpha) * (
+            (1 / city_distance) ** beta
+        )
         probabilities.append(probability)
         city_probabilities[city] = probability
 
@@ -129,25 +152,66 @@ def city_select(
     return chosen_city, unvisited_cities
 
 
+def generate_cities(ask_for_input: bool) -> tuple[str, dict[str, tuple[int, int]]]:
+    # Default values from my mapa
+    if not ask_for_input:
+        # Predefined set of example cities with their coordinates
+        return "A", {
+            "A": (0, 0), "D": (1, 8), "F": (2, 10),
+            "G": (3, 3), "B": (4, 7), "E": (6, 4), "C": (8, 13),
+        }
+
+    # Otherwise let's go
+    # Empty dict for "appending" city with x, y values
+    city_data: dict[str, tuple[int, int]] = {}
+    # Use q to quit
+    while True:
+        user_input = input(
+            "Podaj miasto w formacie 'CityName X Y' ('q' by wyjsc): ")
+        # Ensuring lower so the condition can be easily checked
+        if user_input.lower() == "q":
+            break
+
+        try:
+            # Get 3 values
+            city, x, y = user_input.split()
+            # Create a pair
+            pair = int(x), int(y)
+
+            if pair in city_data.values():
+                print("Te koordynaty juz istnieja. Daj cos innego.")
+                continue
+
+            city_data[city] = pair
+        except (ValueError, TypeError):
+            print("Zly format. Uzyj formatu 'CityName X Y'.")
+        except Exception as e:
+            print(f"Wystapil dziwny error, ktorego nie zlapalem: {e}")
+
+    # Show city_data for choosing staring point
+    pp(city_data)
+    start_city = input("Poczatkowe miasto?: ")
+    # I don't want to play, so I will choose it myself
+    if start_city not in city_data:
+        start_city = random.choice(list(city_data.keys()))
+
+    return start_city, city_data
+
+
 # Entry point of the script
 if __name__ == "__main__":
-    cities = {  # Example cities with their coordinates
-        "A": (0, 0),
-        "D": (1, 8),
-        "F": (2, 10),
-        "G": (3, 3),
-        "B": (4, 7),
-        "E": (6, 4),
-        "C": (8, 13),
-    }
-
-    START_CITY = "A"  # Define the starting city
+    ASK_FOR_INPUT = os.environ.get('INPUT')
+    ask_for_input = True if ASK_FOR_INPUT and ASK_FOR_INPUT.lower() == "yes" else False
+    start_city, cities = generate_cities(ask_for_input)
+    print("Twoje miasta:")
+    pp(cities, indent=4)
 
     # Execute the main function to find the best path and its distance
     best_path, best_distance_value = main(
         cities=cities,  # Miasta - Nodes w Grafie
-        start_city=START_CITY,  # Miasto poczatkowe - czyli start
-        ants_num=len(cities) * 2,  # Liczba mrowek - proporcjonalnie do miast
+        start_city=start_city,  # Miasto poczatkowe - czyli start
+        # Liczba mrowek - odkrywanie nowych tras ale srednio to dziala
+        ants_num=len(cities) * 2,
         iterations_num=1200,  # Liczba iteracji - dlugosc znajdywania optymalnego rozwiazania
         # Wspolczynnik wyparowania feromonu - balansujacy czynnik przy wyborze sciezek
         pheromone_evaporation=0.7,
@@ -157,4 +221,4 @@ if __name__ == "__main__":
     )
 
     # Output the best path and its distance
-    print(f"{best_distance_value} distance for {' -> '.join(best_path)}")
+    print(f"{best_distance_value} distance for {' -> '.join(best_path)}", end="")
