@@ -111,6 +111,16 @@ def wyswietl_parametry(lch, lg):
     print()
 
 
+def zrob_hist(ocena_populacji, nazwa_pliku="hist.txt"):
+    min_fp = np.min(ocena_populacji)
+    max_fp = np.max(ocena_populacji)
+    srednia_fp = np.mean(ocena_populacji)
+
+    with open(nazwa_pliku, "a", encoding="utf-8") as f:
+        f.write(
+            f"{min_fp},{max_fp},{srednia_fp}, wartości zmiennych decyzyjnych.\n")
+
+
 # WYKONYWANIA SKRYPTU GLOWNEGO
 if __name__ == "__main__":
     # KLAWIATURA WCZYTYWANIE
@@ -142,6 +152,8 @@ if __name__ == "__main__":
     print(f"Wagi: {wagi[1:]}")  # Wykluczamy ograniczona wage
 
     # POKAZYWANIE WYNIKOW
-    print("Wyniki:")
     for (i, gen, ocena_ch, waga_ch) in zip(nrxp, xp, ocena_populacji, suma_wag_chromosomow):
         print(f"ch{i:02} -> {gen} = {ocena_ch} z waga: {waga_ch}")
+
+    # TWORZENIE PLIKI HISTORII
+    # zrob_hist(ocena_populacji)
