@@ -1,3 +1,7 @@
+"""
+Ten moduł zawiera funkcje pomocnicze do symulacji algorytmu genetycznego.
+"""
+
 import numpy as np
 
 
@@ -16,14 +20,13 @@ def popinit(lg, lch):
     return xp
 
 
-def ocena(xp, wartosc, waga, waga_max):
+def ocena(xp, wartosc, waga):
     """
     Ocenia populację, uwzględniając ograniczenie na sumę wag.
     Argumenty:
         xp (np.array): Populacja.
         wartosc (np.array): Wartości poszczególnych genów.
         waga (np.array): Waga poszczególnych genów.
-        waga_max (float): Maksymalna dozwolona suma wag.
     Zwraca:
         tuple: Ocena populacji oraz waga chromosomów.
     """
@@ -51,9 +54,9 @@ def wczytaj_z_plikow(lg, plik_waga="wag1.txt", plik_wartosci="wart1.txt"):
     Zwraca:
         tuple: Krotka zawierająca wartości i wagi.
     """
-    wartosci = np.loadtxt("wart1.txt")[:lg]
+    wartosci = np.loadtxt(plik_wartosci)[:lg]
     # Dodajemy 1 bo musi sie shape zgadzac po waga_max
-    wagi = np.loadtxt("wag1.txt")[:lg+1]
+    wagi = np.loadtxt(plik_waga)[: lg + 1]
 
     return wartosci, wagi
 
@@ -112,13 +115,19 @@ def wyswietl_parametry(lch, lg):
 
 
 def zrob_hist(ocena_populacji, nazwa_pliku="hist.txt"):
+    """
+    Zapisuje podstawowe statystyki oceny populacji do pliku.
+
+    Argumenty:
+        ocena_populacji (np.array): Oceny chromosomów w populacji.
+        nazwa_pliku (str): Nazwa pliku, do którego zostaną zapisane statystyki. Domyślnie 'hist.txt'.
+    """
     min_fp = np.min(ocena_populacji)
     max_fp = np.max(ocena_populacji)
     srednia_fp = np.mean(ocena_populacji)
 
     with open(nazwa_pliku, "a", encoding="utf-8") as f:
-        f.write(
-            f"{min_fp},{max_fp},{srednia_fp}, wartości zmiennych decyzyjnych.\n")
+        f.write(f"{min_fp},{max_fp},{srednia_fp}, wartości zmiennych decyzyjnych.\n")
 
 
 def rodzice(xp, ocena_populacji, waga_populacji, waga_max):
@@ -137,32 +146,42 @@ def rodzice(xp, ocena_populacji, waga_populacji, waga_max):
     nrxp = []
     for _ in range(len(xp)):
         ch1, ch2 = np.random.choice(len(xp), 2, replace=False)
+        (waga_ch1, waga_ch2) = (waga_populacji[ch1], waga_populacji[ch2])
 
         # Przekroczone obie wagi, szukamy blizszej
-        if waga_populacji[ch1] > waga_max and waga_populacji[ch2] > waga_max:
-            wybrany = ch1 if abs(
-                waga_populacji[ch1] - waga_max) < abs(waga_populacji[ch2] - waga_max) else ch2
+        if waga_ch1 > waga_max and waga_ch2 > waga_max:
+            wybrany = (
+                ch1 if abs(waga_ch1 - waga_max) < abs(waga_ch2 - waga_max) else ch2
+            )
             print(
-                f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{wybrany + 1:02} wygrał: wagi {waga_populacji[ch1], waga_populacji[ch2]} > {waga_max}, ch{wybrany + 1:02} bliżej waga_max.")
+                f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{wybrany + 1:02} wygrał: wagi {waga_ch1, waga_ch2} > {waga_max}, ch{wybrany + 1:02} bliżej waga_max."
+            )
+
         # ch1 jest ponizej wagi_max, a ch2 powyzej
-        elif waga_populacji[ch1] <= waga_max and waga_populacji[ch2] > waga_max:
+        elif waga_ch1 <= waga_max < waga_ch2:
             print(
-                f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch1 + 1:02} wygrał: waga ch{ch1 + 1} = {waga_populacji[ch1]} <= {waga_max}, waga ch{ch2 + 1:02} = {waga_populacji[ch2]} > {waga_max}.")
+                f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch1 + 1:02} wygrał: waga ch{ch1 + 1} = {waga_ch1} <= {waga_max}, waga ch{ch2 + 1:02} = {waga_ch2} > {waga_max}."
+            )
             wybrany = ch1
+
         # ch2 jest ponizej wagi_max, a ch1 powyzej
-        elif waga_populacji[ch2] <= waga_max and waga_populacji[ch1] > waga_max:
+        elif waga_ch2 <= waga_max < waga_ch1:
             print(
-                f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch2 + 1:02} wygrał: waga ch{ch2 + 1} = {waga_populacji[ch2]} <= {waga_max}, waga ch{ch1 + 1:02} = {waga_populacji[ch1]} > {waga_max}.")
+                f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch2 + 1:02} wygrał: waga ch{ch2 + 1} = {waga_ch2} <= {waga_max}, waga ch{ch1 + 1:02} = {waga_ch1} > {waga_max}."
+            )
             wybrany = ch2
+
         # pojedynek ocen
         else:
             wybrany = ch1 if ocena_populacji[ch1] > ocena_populacji[ch2] else ch2
             if wybrany == ch1:
                 print(
-                    f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch1 + 1} wygrał: wagi ({waga_populacji[ch1]}, {waga_populacji[ch2]}) <= {waga_max}, oceny ch{ch1 + 1} = {ocena_populacji[ch1]} > {ocena_populacji[ch2]} (ocena ch{ch2 + 1}).")
+                    f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch1 + 1} wygrał: wagi ({waga_ch1}, {waga_ch2}) <= {waga_max}, oceny ch{ch1 + 1} = {ocena_populacji[ch1]} > {ocena_populacji[ch2]} (ocena ch{ch2 + 1})."
+                )
             else:
                 print(
-                    f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch2 + 1} wygrał: wagi ({waga_populacji[ch1]}, {waga_populacji[ch2]}) <= {waga_max}, oceny ch{ch2 + 1} = {ocena_populacji[ch2]} > {ocena_populacji[ch1]} (ocena ch{ch1 + 1}).")
+                    f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch2 + 1} wygrał: wagi ({waga_ch1}, {waga_ch2}) <= {waga_max}, oceny ch{ch2 + 1} = {ocena_populacji[ch2]} > {ocena_populacji[ch1]} (ocena ch{ch1 + 1})."
+                )
 
         nrxp.append(wybrany)
 
@@ -183,9 +202,7 @@ if __name__ == "__main__":
     xp = popinit(lg, lch)
 
     # OCENIANIE POPULACJI
-    (ocena_populacji, suma_wag_chromosomow) = ocena(
-        xp, wartosci, wagi[1:], waga_max  # Wykluczamy element 0 bo to waga_max
-    )
+    (ocena_populacji, suma_wag_chromosomow) = ocena(xp, wartosci, wagi[1:])
 
     # POKAZYWANIE POPULACJI
     print("Populacja chromosomow:")
@@ -199,20 +216,21 @@ if __name__ == "__main__":
     print(f"{waga_max=}")
 
     # POKAZYWANIE WYNIKOW
-    for i, (gen, ocena_ch, waga_ch) in enumerate(zip(xp, ocena_populacji, suma_wag_chromosomow), 1):
+    for i, (gen, ocena_ch, waga_ch) in enumerate(
+        zip(xp, ocena_populacji, suma_wag_chromosomow), 1
+    ):
         print(f"ch{i:02} -> {gen} = {ocena_ch} z wagą: {waga_ch}")
 
     # PRZEPROWADZANIE TURNIEJU
     print("\n--> TURNIEJ <--")
-    print(f"{waga_max=}")
-    nrxp = rodzice(
-        xp, ocena_populacji, suma_wag_chromosomow, waga_max)
+    nrxp = rodzice(xp, ocena_populacji, suma_wag_chromosomow, waga_max)
     print("Indeksy zwyciezcow turnieju: ")
     print(nrxp)
 
     for nr in nrxp:
         print(
-            f"ch {nr + 1:02}: ocena = {ocena_populacji[nr]}, waga = {suma_wag_chromosomow[nr]}")
+            f"ch {nr + 1:02}: ocena = {ocena_populacji[nr]}, waga = {suma_wag_chromosomow[nr]}"
+        )
 
     # TWORZENIE PLIKI HISTORII
     # zrob_hist(ocena_populacji)
