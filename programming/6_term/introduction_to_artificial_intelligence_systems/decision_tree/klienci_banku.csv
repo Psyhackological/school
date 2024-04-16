@@ -1,0 +1,13 @@
+Dochody,Płeć,Stan cywilny,Wkład własny,Czy dostał kredyt
+niskie,K,w związku,>20%,tak
+niskie,M,wolny,>20%,tak
+średnie,K,w związku,20%,tak
+wysokie,K,wolny,10%,tak
+wysokie,M,w związku,20%,tak
+wysokie,M,wolny,>20%,tak
+średnie,K,wolny,20%,nie
+niskie,M,w związku,10%,nie
+wysokie,M,w związku,10%,tak
+średnie,K,wolny,20%,nie
+średnie,M,w związku,>20%,tak
+niskie,K,wolny,10%,nie
