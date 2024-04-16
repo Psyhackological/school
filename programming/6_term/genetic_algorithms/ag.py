@@ -82,12 +82,12 @@ def wczytaj_z_klawiatury():
     # lpop = int(input("Podaj liczbe pokolen (max. 500): "))
     # lpop = min(lpop, 500)  # (max. 500)
 
-    # pm - prawdopodobienstwo zajscia mutacji (0. – 0.1)
-    # pm = float(input("Podaj prawdopodobienstwo zajscia mutacji (0. – 0.1): "))
+    # pm - prawdopodobienstwo zajscia mutacji (0. - 0.1)
+    # pm = float(input("Podaj prawdopodobienstwo zajscia mutacji (0. - 0.1): "))
     # pm = min(pm, 0.1)  # Gdy bedzie za duzo wezmiemy 0.1
 
-    # prawdopodobienstwo zajscia krzyzowania (0.6 – 1.0)
-    # pk = float(input("Podaj prawdopodobienstwo zajscia krzyzowania (0.6 – 1.0): "))
+    # prawdopodobienstwo zajscia krzyzowania (0.6 - 1.0)
+    # pk = float(input("Podaj prawdopodobienstwo zajscia krzyzowania (0.6 - 1.0): "))
     # pk = min(pk, 0.8)  # Gdy bedzie za duzo wezmiemy cos po srodku
 
     return (lch, lg)
