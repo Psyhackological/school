@@ -23,6 +23,7 @@ import os  # Checking for existance of file
 import json  # Visualizaing and saving decision tree in json format
 import random  # For fun due to same value of the tree's root
 from math import log2  # Return the base-2 logarithm of x.
+from pathlib import Path  # For cross-platform Paths
 import pandas as pd  # For .csv file
 
 
@@ -102,12 +103,14 @@ def choose_best_attribute(clients_data, attributes, target_column):
     for attr in attributes:
         attr_entropy = entropy_of_attribute(clients_data, attr, target_column)
         information_gain[attr] = total_entropy - attr_entropy
-        print(f"Atrybut: {attr}, Zysk informacyjny: {information_gain[attr]:.2f}")
+        print(
+            f"Atrybut: {attr}, Zysk informacyjny: {information_gain[attr]:.2f}")
 
     # Find the maximum information gain across all attributes
     max_gain = max(information_gain.values())
     # Collect all attributes that have the maximum information gain
-    best_attrs = [attr for attr, gain in information_gain.items() if gain == max_gain]
+    best_attrs = [attr for attr, gain in information_gain.items()
+                  if gain == max_gain]
     # Randomly select one if multiple attributes have the same maximum gain
     best_attr = random.choice(best_attrs)
     print(f"=== Najlepszy atrybut: {best_attr} ===")
@@ -148,7 +151,8 @@ def build_tree(clients_data, target_column, attributes):
         subset = clients_data[clients_data[best_attr] == value]
         # Recursive call excluding the current best attribute from the list of attributes
         subtree = build_tree(
-            subset, target_column, [attr for attr in attributes if attr != best_attr]
+            subset, target_column, [
+                attr for attr in attributes if attr != best_attr]
         )
         tree[best_attr][value] = subtree
 
@@ -178,11 +182,12 @@ def main():
     root_attribute = next(iter(decision_tree))
     # Using it as filename subfix
     filename = f"decision_tree_{root_attribute}.json"
+    path = Path("outcomes") / filename
 
     # Saving the tree to a JSON file only if it doesn't already exist
-    if not os.path.exists(filename):  # Checks if the file does not exist
+    if not os.path.exists(path):  # Checks if the file does not exist
         # Saving the tree to a JSON file
-        with open(filename, "w", encoding="utf-8") as json_file:
+        with open(path, "w", encoding="utf-8") as json_file:
             # Saves the decision tree to the file
             json.dump(decision_tree, json_file, indent=4)
 

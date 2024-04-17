@@ -1,0 +1,17 @@
+{
+    "wklad_wlasny": {
+        ">20%": "tak",
+        "20%": {
+            "stan_cywilny": {
+                "w zwiazku": "tak",
+                "wolny": "nie"
+            }
+        },
+        "10%": {
+            "dochody": {
+                "wysokie": "tak",
+                "niskie": "nie"
+            }
+        }
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "dochody": {
+        "niskie": {
+            "wklad_wlasny": {
+                ">20%": "tak",
+                "10%": "nie"
+            }
+        },
+        "srednie": {
+            "stan_cywilny": {
+                "w zwiazku": "tak",
+                "wolny": "nie"
+            }
+        },
+        "wysokie": "tak"
+    }
+}
