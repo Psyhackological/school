@@ -1,0 +1,19 @@
+---
+title: Czy dostał kredyt?
+---
+
+graph TD;
+    A[wklad_wlasny] -->|">20%"| B[tak]
+    A -->|"20%"| C[stan_cywilny]
+    A -->|"10%"| D[dochody]
+
+    C -->|w zwiazku| E[tak]
+    C -->|wolny| F[nie]
+    
+    D -->|wysokie| G[tak]
+    D -->|niskie| H[nie]
+
+    classDef yesNode fill:#9f6,stroke:#333,stroke-width:2px;
+    classDef noNode fill:#f99,stroke:#333,stroke-width:2px;
+    class B,E,G yesNode;
+    class F,H noNode;

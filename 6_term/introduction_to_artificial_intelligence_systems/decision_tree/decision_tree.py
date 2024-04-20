@@ -182,7 +182,14 @@ def main():
     root_attribute = next(iter(decision_tree))
     # Using it as filename subfix
     filename = f"decision_tree_{root_attribute}.json"
-    path = Path("outcomes") / filename
+    # Directory where the file will be saved
+    directory = r'outcomes'
+    path = Path(directory) / filename
+
+    # Check if the directory exists; if not, create it
+    if not os.path.exists(directory):
+        # Safe check to create the directory if it does not exist
+        os.makedirs(directory, exist_ok=True)
 
     # Saving the tree to a JSON file only if it doesn't already exist
     if not os.path.exists(path):  # Checks if the file does not exist
