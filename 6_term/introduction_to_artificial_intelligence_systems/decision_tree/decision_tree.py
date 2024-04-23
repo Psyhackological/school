@@ -28,7 +28,7 @@ import pandas as pd  # For .csv file
 
 
 # Loading CSV into dataframe
-data = pd.read_csv("klienci_banku.csv")
+data = pd.read_csv("should_i_play_tennis.csv")
 
 
 def calculate_entropy(dataset, target_column):
@@ -167,12 +167,12 @@ def main():
     The function defines which column to use as the decision attribute, prepares other attributes for building the tree, and manages file output.
     """
     # Column by which we will divide
-    decision_attribute = "czy_dostal_kredyt"
+    decision_attribute = "PlayTennis"
     # Preparing attributes without a decision column
     attributes = [col for col in data.columns if col != decision_attribute]
 
     # Building the tree
-    decision_tree = build_tree(data, "czy_dostal_kredyt", attributes)
+    decision_tree = build_tree(data, decision_attribute, attributes)
 
     # Display tree in JSON format
     print("Wygenerowane drzewo decyzyjne:")

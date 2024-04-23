@@ -1,0 +1,17 @@
+---
+title: Should I play tennis?
+---
+
+graph TD
+    A[Outlook] -->|Sunny| B[Humidity]
+    B -->|High| C[No]
+    B -->|Normal| D[Yes]
+    A -->|Overcast| E[Yes]
+    A -->|Rain| F[Wind]
+    F -->|Weak| G[Yes]
+    F -->|Strong| H[No]
+
+classDef yesNode fill:#9f6,stroke:#333,stroke-width:2px;
+    classDef noNode fill:#f99,stroke:#333,stroke-width:2px;
+    class D,E,G yesNode;
+    class C,H noNode;
