@@ -28,7 +28,9 @@ import pandas as pd  # For .csv file
 
 
 # Loading CSV into dataframe
-data = pd.read_csv("should_i_play_tennis.csv")
+csv_dir = r'csv'
+csv_filename = r'should_i_play_tennis.csv'
+data = pd.read_csv(Path(csv_dir) / Path(csv_filename))
 
 
 def calculate_entropy(dataset, target_column):
@@ -181,10 +183,10 @@ def main():
     # Generating root attribute
     root_attribute = next(iter(decision_tree))
     # Using it as filename subfix
-    filename = f"decision_tree_{root_attribute}.json"
+    json_filename = f"decision_tree_{root_attribute}.json"
     # Directory where the file will be saved
     directory = r'outcomes'
-    path = Path(directory) / filename
+    path = Path(directory) / Path(json_filename)
 
     # Check if the directory exists; if not, create it
     if not os.path.exists(directory):
