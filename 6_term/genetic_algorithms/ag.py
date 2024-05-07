@@ -192,20 +192,20 @@ def mutuj(xp, pm):
     """
     # Przechodzimy przez kazdy chromosom w populacji
     for i, chromosom in enumerate(xp, 1):
-        print(f"\nch{i} przed mutacja: {chromosom}")
+        print(f"\nch{i:02} przed mutacja: {chromosom}")
         # Przechodzimy przez kazdy gen w chromosomie
         for j, gen in enumerate(chromosom):
             p = np.random.random()  # Generujemy losowe prawdopodobienstwo
             if p < pm:  # Sprawdzamy, czy mutacja ma zajsc
                 print(
-                    f"  g{j+1}: pm = {p:.2f}, wiec {1 - chromosom[j]} --> {chromosom[j]}"
+                    f"  g{j+1}: pm = {p:.2f} < {pm:.2f}, wiec {chromosom[j]} --> {chromosom[j] ^ 1}"
                 )
                 # Uzycie operatora XOR do zmiany wartosci genu
                 chromosom[j] ^= 1
             else:
                 print(f"  g{j+1}: pm = {p:.2f}")
 
-        print(f"ch{i} po mutacji: {chromosom}")
+        print(f"ch{i:02} po mutacji: {chromosom}")
 
     return xp
 
@@ -256,6 +256,6 @@ if __name__ == "__main__":
             f"ch {nr + 1:02}: ocena = {ocena_populacji[nr]}, waga = {suma_wag_chromosomow[nr]}"
         )
 
-    # Mutacja populacji
+    # MUTACJA POPULACJI
     PM = 0.1
     populacja_zmutowana = mutuj(xp, PM)
