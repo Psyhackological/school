@@ -79,13 +79,13 @@ def wczytaj_z_klawiatury():
     lg = min(lg, 10)  # (max. 10)
 
     # Liczba pokolen
-    lpop = int(input("Podaj liczbe pokolen (max. 500): "))
-    lpop = min(lpop, 500)  # (max. 500)
+    # lpop = int(input("Podaj liczbe pokolen (max. 500): "))
+    # lpop = min(lpop, 500)  # (max. 500)
 
-    return (lch, lg, lpop)
+    return (lch, lg)
 
 
-def wyswietl_parametry(lch, lg, lpop):
+def wyswietl_parametry(lch, lg):
     """
     Wyswietla parametry algorytmu genetycznego.
 
@@ -100,7 +100,7 @@ def wyswietl_parametry(lch, lg, lpop):
     print("Wybrane parametry:")
     print(f"{lch = }")
     print(f"{lg = }")
-    print(f"{lpop = }")
+    # print(f"{lpop = }")
     print()
 
 
@@ -117,8 +117,7 @@ def zrob_hist(ocena_populacji, nazwa_pliku="hist.txt"):
     srednia_fp = np.mean(ocena_populacji)
 
     with open(nazwa_pliku, "a", encoding="utf-8") as f:
-        f.write(
-            f"{min_fp},{max_fp},{srednia_fp}, wartosci zmiennych decyzyjnych.\n")
+        f.write(f"{min_fp},{max_fp},{srednia_fp}, wartosci zmiennych decyzyjnych.\n")
 
 
 def rodzice(xp, ocena_populacji, waga_populacji, waga_max):
@@ -142,8 +141,7 @@ def rodzice(xp, ocena_populacji, waga_populacji, waga_max):
         # Przekroczone obie wagi, szukamy blizszej
         if waga_ch1 > waga_max and waga_ch2 > waga_max:
             wybrany = (
-                ch1 if abs(waga_ch1 - waga_max) < abs(waga_ch2 -
-                                                      waga_max) else ch2
+                ch1 if abs(waga_ch1 - waga_max) < abs(waga_ch2 - waga_max) else ch2
             )
             print(
                 f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{wybrany + 1:02} wygral: wagi {waga_ch1, waga_ch2} > {waga_max}, ch{wybrany + 1:02} blizej waga_max."
@@ -180,11 +178,43 @@ def rodzice(xp, ocena_populacji, waga_populacji, waga_max):
     return nrxp
 
 
+def mutuj(xp, pm):
+    """
+    Mutuje populacje chromosomow, informujac o prawdopodobienstwie mutacji kazdego genu
+    oraz pokazujac stan chromosomu przed i po mutacji.
+
+    Argumenty:
+        xp (np.array): Populacja chromosomow.
+        pm (float): Prawdopodobienstwo mutacji dla kazdego genu.
+
+    Zwraca:
+        np.array: Zmutowana populacja.
+    """
+    # Przechodzimy przez kazdy chromosom w populacji
+    for i, chromosom in enumerate(xp, 1):
+        print(f"\nch{i} przed mutacja: {chromosom}")
+        # Przechodzimy przez kazdy gen w chromosomie
+        for j, gen in enumerate(chromosom):
+            p = np.random.random()  # Generujemy losowe prawdopodobienstwo
+            if p < pm:  # Sprawdzamy, czy mutacja ma zajsc
+                print(
+                    f"  g{j+1}: pm = {p:.2f}, wiec {1 - chromosom[j]} --> {chromosom[j]}"
+                )
+                # Uzycie operatora XOR do zmiany wartosci genu
+                chromosom[j] ^= 1
+            else:
+                print(f"  g{j+1}: pm = {p:.2f}")
+
+        print(f"ch{i} po mutacji: {chromosom}")
+
+    return xp
+
+
 # WYKONYWANIA SKRYPTU GLOWNEGO
 if __name__ == "__main__":
     # KLAWIATURA WCZYTYWANIE
-    (lch, lg, lpop) = wczytaj_z_klawiatury()
-    wyswietl_parametry(lch, lg, lpop)
+    (lch, lg) = wczytaj_z_klawiatury()
+    wyswietl_parametry(lch, lg)
 
     # PLIKI WCZYTANIE
     (wartosci, wagi) = wczytaj_z_plikow(lg)
@@ -226,5 +256,6 @@ if __name__ == "__main__":
             f"ch {nr + 1:02}: ocena = {ocena_populacji[nr]}, waga = {suma_wag_chromosomow[nr]}"
         )
 
-    # TWORZENIE PLIKI HISTORII
-    # zrob_hist(ocena_populacji)
+    # Mutacja populacji
+    PM = 0.1
+    populacja_zmutowana = mutuj(xp, PM)
