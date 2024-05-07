@@ -79,21 +79,13 @@ def wczytaj_z_klawiatury():
     lg = min(lg, 10)  # (max. 10)
 
     # Liczba pokolen
-    # lpop = int(input("Podaj liczbe pokolen (max. 500): "))
-    # lpop = min(lpop, 500)  # (max. 500)
+    lpop = int(input("Podaj liczbe pokolen (max. 500): "))
+    lpop = min(lpop, 500)  # (max. 500)
 
-    # pm - prawdopodobienstwo zajscia mutacji (0. - 0.1)
-    # pm = float(input("Podaj prawdopodobienstwo zajscia mutacji (0. - 0.1): "))
-    # pm = min(pm, 0.1)  # Gdy bedzie za duzo wezmiemy 0.1
-
-    # prawdopodobienstwo zajscia krzyzowania (0.6 - 1.0)
-    # pk = float(input("Podaj prawdopodobienstwo zajscia krzyzowania (0.6 - 1.0): "))
-    # pk = min(pk, 0.8)  # Gdy bedzie za duzo wezmiemy cos po srodku
-
-    return (lch, lg)
+    return (lch, lg, lpop)
 
 
-def wyswietl_parametry(lch, lg):
+def wyswietl_parametry(lch, lg, lpop):
     """
     Wyswietla parametry algorytmu genetycznego.
 
@@ -108,9 +100,7 @@ def wyswietl_parametry(lch, lg):
     print("Wybrane parametry:")
     print(f"{lch = }")
     print(f"{lg = }")
-    # print(f"{lpop = }")
-    # print(f"{pm = }")
-    # print(f"{pk = }")
+    print(f"{lpop = }")
     print()
 
 
@@ -193,8 +183,8 @@ def rodzice(xp, ocena_populacji, waga_populacji, waga_max):
 # WYKONYWANIA SKRYPTU GLOWNEGO
 if __name__ == "__main__":
     # KLAWIATURA WCZYTYWANIE
-    (lch, lg) = wczytaj_z_klawiatury()
-    wyswietl_parametry(lch, lg)
+    (lch, lg, lpop) = wczytaj_z_klawiatury()
+    wyswietl_parametry(lch, lg, lpop)
 
     # PLIKI WCZYTANIE
     (wartosci, wagi) = wczytaj_z_plikow(lg)
