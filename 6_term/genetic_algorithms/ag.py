@@ -79,13 +79,13 @@ def wczytaj_z_klawiatury():
     lg = min(lg, 10)  # (max. 10)
 
     # Liczba pokolen
-    # lpop = int(input("Podaj liczbe pokolen (max. 500): "))
-    # lpop = min(lpop, 500)  # (max. 500)
+    lpop = int(input("Podaj liczbe pokolen (max. 500): "))
+    lpop = min(lpop, 500)  # (max. 500)
 
-    return (lch, lg)
+    return (lch, lg, lpop)
 
 
-def wyswietl_parametry(lch, lg):
+def wyswietl_parametry(lch, lg, lpop):
     """
     Wyswietla parametry algorytmu genetycznego.
 
@@ -100,24 +100,28 @@ def wyswietl_parametry(lch, lg):
     print("Wybrane parametry:")
     print(f"{lch = }")
     print(f"{lg = }")
-    # print(f"{lpop = }")
+    print(f"{lpop = }")
     print()
 
 
-def zrob_hist(ocena_populacji, nazwa_pliku="hist.txt"):
+def zapis(ocena_populacji, xp, iteracja, nazwa_pliku="hist.dat"):
     """
     Zapisuje podstawowe statystyki oceny populacji do pliku.
-
     Argumenty:
         ocena_populacji (np.array): Oceny chromosomow w populacji.
-        nazwa_pliku (str): Nazwa pliku, do ktorego zostana zapisane statystyki. Domyslnie 'hist.txt'.
+        xp (np.array): Populacja chromosomow.
+        iteracja (int): Numer iteracji.
+        nazwa_pliku (str): Nazwa pliku do zapisu. Domyslnie 'hist.dat'.
     """
     min_fp = np.min(ocena_populacji)
     max_fp = np.max(ocena_populacji)
     srednia_fp = np.mean(ocena_populacji)
 
     with open(nazwa_pliku, "a", encoding="utf-8") as f:
-        f.write(f"{min_fp},{max_fp},{srednia_fp}, wartosci zmiennych decyzyjnych.\n")
+        f.write(f"{iteracja},{min_fp},{max_fp},{srednia_fp}")
+        for chromosom in xp.T:  # iterujemy po kolumnach, poniewaz xp to tablica 2D
+            f.write(f",{chromosom[1:].tolist()}")
+        f.write("\n")
 
 
 def rodzice(xp, ocena_populacji, waga_populacji, waga_max):
@@ -143,35 +147,35 @@ def rodzice(xp, ocena_populacji, waga_populacji, waga_max):
             wybrany = (
                 ch1 if abs(waga_ch1 - waga_max) < abs(waga_ch2 - waga_max) else ch2
             )
-            print(
-                f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{wybrany + 1:02} wygral: wagi {waga_ch1, waga_ch2} > {waga_max}, ch{wybrany + 1:02} blizej waga_max."
-            )
+            # print(
+            #     f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{wybrany + 1:02} wygral: wagi {waga_ch1, waga_ch2} > {waga_max}, ch{wybrany + 1:02} blizej waga_max."
+            # )
 
         # ch1 jest ponizej wagi_max, a ch2 powyzej
         elif waga_ch1 <= waga_max < waga_ch2:
-            print(
-                f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch1 + 1:02} wygral: waga ch{ch1 + 1} = {waga_ch1} <= {waga_max}, waga ch{ch2 + 1:02} = {waga_ch2} > {waga_max}."
-            )
             wybrany = ch1
+            # print(
+            #     f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch1 + 1:02} wygral: waga ch{ch1 + 1} = {waga_ch1} <= {waga_max}, waga ch{ch2 + 1:02} = {waga_ch2} > {waga_max}."
+            # )
 
         # ch2 jest ponizej wagi_max, a ch1 powyzej
         elif waga_ch2 <= waga_max < waga_ch1:
-            print(
-                f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch2 + 1:02} wygral: waga ch{ch2 + 1} = {waga_ch2} <= {waga_max}, waga ch{ch1 + 1:02} = {waga_ch1} > {waga_max}."
-            )
             wybrany = ch2
+            # print(
+            #     f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch2 + 1:02} wygral: waga ch{ch2 + 1} = {waga_ch2} <= {waga_max}, waga ch{ch1 + 1:02} = {waga_ch1} > {waga_max}."
+            # )
 
         # pojedynek ocen
         else:
             wybrany = ch1 if ocena_populacji[ch1] > ocena_populacji[ch2] else ch2
-            if wybrany == ch1:
-                print(
-                    f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch1 + 1} wygral: wagi ({waga_ch1}, {waga_ch2}) <= {waga_max}, oceny ch{ch1 + 1} = {ocena_populacji[ch1]} > {ocena_populacji[ch2]} (ocena ch{ch2 + 1})."
-                )
-            else:
-                print(
-                    f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch2 + 1} wygral: wagi ({waga_ch1}, {waga_ch2}) <= {waga_max}, oceny ch{ch2 + 1} = {ocena_populacji[ch2]} > {ocena_populacji[ch1]} (ocena ch{ch1 + 1})."
-                )
+            # if wybrany == ch1:
+            #     print(
+            #         f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch1 + 1} wygral: wagi ({waga_ch1}, {waga_ch2}) <= {waga_max}, oceny ch{ch1 + 1} = {ocena_populacji[ch1]} > {ocena_populacji[ch2]} (ocena ch{ch2 + 1})."
+            #     )
+            # else:
+            #     print(
+            #         f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{ch2 + 1} wygral: wagi ({waga_ch1}, {waga_ch2}) <= {waga_max}, oceny ch{ch2 + 1} = {ocena_populacji[ch2]} > {ocena_populacji[ch1]} (ocena ch{ch1 + 1})."
+            #     )
 
         nrxp.append(wybrany)
 
@@ -192,40 +196,60 @@ def mutuj(xp, pm):
     """
     # Przechodzimy przez kazdy chromosom w populacji
     for i, chromosom in enumerate(xp, 1):
-        print(f"\nch{i:02} przed mutacja: {chromosom}")
+        # print(f"\nch{i:02} przed mutacja: {chromosom}")
         # Przechodzimy przez kazdy gen w chromosomie
         for j, gen in enumerate(chromosom):
             p = np.random.random()  # Generujemy losowe prawdopodobienstwo
             if p < pm:  # Sprawdzamy, czy mutacja ma zajsc
-                print(
-                    f"  g{j+1}: pm = {p:.2f} < {pm:.2f}, wiec {chromosom[j]} --> {chromosom[j] ^ 1}"
-                )
+                # print(
+                #     f"  g{j+1}: pm = {p:.2f} < {pm:.2f}, wiec {chromosom[j]} --> {chromosom[j] ^ 1}"
+                # )
                 # Uzycie operatora XOR do zmiany wartosci genu
                 chromosom[j] ^= 1
-            else:
-                print(f"  g{j+1}: pm = {p:.2f}")
+            # else:
+            #     print(f"  g{j+1}: pm = {p:.2f}")
 
-        print(f"ch{i:02} po mutacji: {chromosom}")
+        # print(f"ch{i:02} po mutacji: {chromosom}")
 
     return xp
 
 
-# WYKONYWANIA SKRYPTU GLOWNEGO
-if __name__ == "__main__":
-    # KLAWIATURA WCZYTYWANIE
-    (lch, lg) = wczytaj_z_klawiatury()
-    wyswietl_parametry(lch, lg)
+def potomek(xp, pk_zakres_poczatek, pk_zakres_koniec):
+    """
+    Wykonuje krzyzowanie (crossover) pomiedzy chromosomami rodzicielskimi.
 
-    # PLIKI WCZYTANIE
-    (wartosci, wagi) = wczytaj_z_plikow(lg)
-    waga_max = wagi[0]  # Ustalone z gory
+    Argumenty:
+        xp (np.array): Populacja chromosomow.
+        pk (float): Prawdopodobienstwo krzyzowania.
 
-    # TWORZENIE POPULACJI
-    xp = popinit(lg, lch)
+    Zwraca:
+        np.array: Populacja po krzyzowaniu.
+    """
+    lch = xp.shape[1]  # liczba chromosomow
+    xp_kopia = xp.copy()
 
-    # OCENIANIE POPULACJI
-    (ocena_populacji, suma_wag_chromosomow) = ocena(xp, wartosci, wagi[1:])
+    for i in range(0, lch - 1, 2):
+        prawdopodobienstwo = np.random.random()
+        if pk_zakres_poczatek <= prawdopodobienstwo <= pk_zakres_koniec:
+            punkt_ciecia = np.random.randint(1, xp.shape[0] - 1)
+            print(f"\nPara rodzicow: {i+1} i {i+2}, punkt ciecia: {punkt_ciecia}")
+            print(
+                f"Rodzice przed krzyzowaniem: ch{i+1}: {xp[:, i]}, ch{i+2}: {xp[:, i+1]}"
+            )
+            # Krzyzowanie jednopunktowe
+            xp_kopia[punkt_ciecia:, i], xp_kopia[punkt_ciecia:, i + 1] = (
+                xp[punkt_ciecia:, i + 1],
+                xp[punkt_ciecia:, i],
+            )
+            print(
+                f"Rodzice po krzyzowaniu: ch{i+1}: {xp_kopia[:, i]}, ch{i+2}: {xp_kopia[:, i+1]}"
+            )
 
+    return xp_kopia
+
+
+# Nie wywoluje, pozostalosc po starym debugu
+def debug(xp, ocena_populacji, suma_wag_chromosomow, wartosci, wagi, waga_max):
     # POKAZYWANIE POPULACJI
     print("Populacja chromosomow:")
     for i, gen in enumerate(xp, 1):
@@ -256,6 +280,69 @@ if __name__ == "__main__":
             f"ch {nr + 1:02}: ocena = {ocena_populacji[nr]}, waga = {suma_wag_chromosomow[nr]}"
         )
 
-    # MUTACJA POPULACJI
+
+# WYKONYWANIA SKRYPTU GLOWNEGO
+if __name__ == "__main__":
+    # Wczytanie parametrow algorytmu z klawiatury
+    (lch, lg, lpop) = wczytaj_z_klawiatury()
+    wyswietl_parametry(lch, lg, lpop)
+
+    # Wczytanie danych z plikow
+    (wartosci, wagi) = wczytaj_z_plikow(lg)
+    waga_max = wagi[0]  # Maksymalna dozwolona waga chromosomu
+
+    # Inicjalizacja populacji
+    xp = popinit(lg, lch)
+    ocena_populacji, suma_wag_chromosomow = ocena(xp, wartosci, wagi[1:])
+
+    # Zapis poczatkowej populacji
+    zapis(ocena_populacji, xp, 0)
+
+    # Parametry mutacji i krzyzowania
     PM = 0.1
-    populacja_zmutowana = mutuj(xp, PM)
+    PK_OD = 0.6
+    PK_DO = 1.0
+
+    najlepszy_chromosom = None
+    najlepsza_ocena = 0
+    najlepsza_waga = 0
+    najlepsza_iteracja = 0
+
+    # Glowna petla algorytmu
+    for i in range(1, lpop + 1):
+        print(f"\nIteracja {i}")
+
+        # Selekcja rodzicow
+        indeksy_rodzicow = rodzice(xp, ocena_populacji, suma_wag_chromosomow, waga_max)
+        xp = xp[indeksy_rodzicow]
+
+        # Mutacja
+        xp = mutuj(xp, PM)
+
+        # Krzyzowanie
+        xp = potomek(xp, PK_OD, PK_DO)
+
+        # Ocenianie populacji
+        (ocena_populacji, suma_wag_chromosomow) = ocena(xp, wartosci, wagi[1:])
+
+        # Zapis stanu populacji
+        zapis(ocena_populacji, xp, i)
+
+        # Aktualizacja najlepszego rozwiazania
+        max_ocena_iteracji = np.max(ocena_populacji)
+        max_index = np.argmax(ocena_populacji)
+        if (
+            max_ocena_iteracji > najlepsza_ocena
+            and suma_wag_chromosomow[max_index] <= waga_max
+        ):
+            najlepsza_ocena = max_ocena_iteracji
+            najlepszy_chromosom = xp[max_index]
+            najlepsza_waga = suma_wag_chromosomow[max_index]
+            najlepsza_iteracja = i
+
+    # Wyswietlenie najlepszego rozwiazania
+    print(f"Najlepszy chromosom: {najlepszy_chromosom}")
+    print(
+        f"Najlepsza wartosc funkcji przystosowania: {najlepsza_ocena} w iteracji {najlepsza_iteracja}"
+    )
+    print(f"Waga najlepszego chromosomu: {najlepsza_waga}")
