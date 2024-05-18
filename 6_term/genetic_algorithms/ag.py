@@ -30,27 +30,20 @@ def ocena(xp, wartosc, waga):
     Zwraca:
         tuple: Ocena populacji oraz waga chromosomow.
     """
-    ocena_populacji = []
-    waga_chromosomu = []
 
-    for chromosom in xp:
-        suma_wag = np.sum(chromosom * waga)
-        fp = np.sum(chromosom * wartosc)
-        ocena_populacji.append(fp)
-        waga_chromosomu.append(suma_wag)
+    ocena_populacji = np.sum(xp * wartosc, axis=1)
+    waga_chromosomu = np.sum(xp * waga, axis=1)
 
-    return (np.array(ocena_populacji), np.array(waga_chromosomu))
+    return (ocena_populacji, waga_chromosomu)
 
 
 def wczytaj_z_plikow(lg, plik_waga="wag1.txt", plik_wartosci="wart1.txt"):
     """
     Wczytuje wartosci i wagi z plikow.
-
     Argumenty:
         lg (int): Liczba genow w chromosomie.
         plik_waga (str, optional): Sciezka do pliku z wagami. Domyslnie "wag1.txt".
         plik_wartosci (str, optional): Sciezka do pliku z wartosciami. Domyslnie "wart1.txt".
-
     Zwraca:
         tuple: Krotka zawierajaca wartosci i wagi.
     """
@@ -104,14 +97,14 @@ def wyswietl_parametry(lch, lg, lpop):
     print()
 
 
-def zapis(ocena_populacji, xp, iteracja, nazwa_pliku="hist.dat"):
+def zapis(ocena_populacji, xp, iteracja, nazwa_pliku="hist_45430.dat"):
     """
     Zapisuje podstawowe statystyki oceny populacji do pliku.
     Argumenty:
         ocena_populacji (np.array): Oceny chromosomow w populacji.
         xp (np.array): Populacja chromosomow.
         iteracja (int): Numer iteracji.
-        nazwa_pliku (str): Nazwa pliku do zapisu. Domyslnie 'hist.dat'.
+        nazwa_pliku (str): Nazwa pliku do zapisu. Domyslnie 'hist_45430.dat'.
     """
     min_fp = np.min(ocena_populacji)
     max_fp = np.max(ocena_populacji)
@@ -225,10 +218,10 @@ def potomek(xp, pk_zakres_poczatek, pk_zakres_koniec):
     Zwraca:
         np.array: Populacja po krzyzowaniu.
     """
-    lch = xp.shape[1]  # liczba chromosomow
+    lg = xp.shape[1]
     xp_kopia = xp.copy()
 
-    for i in range(0, lch - 1, 2):
+    for i in range(0, lg - 1, 2):
         prawdopodobienstwo = np.random.random()
         if pk_zakres_poczatek <= prawdopodobienstwo <= pk_zakres_koniec:
             punkt_ciecia = np.random.randint(1, xp.shape[0] - 1)
