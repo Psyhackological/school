@@ -75,10 +75,18 @@ def wczytaj_z_klawiatury():
     lpop = int(input("Podaj liczbe pokolen (max. 500): "))
     lpop = min(lpop, 500)  # (max. 500)
 
-    return (lch, lg, lpop)
+    # Prawdopodobienstwo populacji
+    pm = float(input("Podaj prawdopodobienstwo mutacji (0 - 0.1): "))
+    pm = min(lpop, 0.1)  # (max. 0.1)
+
+    # Prawdopodobienstwo populacji
+    pk = float(input("Podaj prawdopodobienstwo krzyzowania (0.6 - 1.0): "))
+    pk = min(lpop, 0.8)  # (max. 1.0 ale wzialem srodek)
+
+    return (lch, lg, lpop, pm, pk)
 
 
-def wyswietl_parametry(lch, lg, lpop):
+def wyswietl_parametry(lch, lg, lpop, pm, pk):
     """
     Wyswietla parametry algorytmu genetycznego.
 
@@ -89,15 +97,21 @@ def wyswietl_parametry(lch, lg, lpop):
         pm (float): Prawdopodobienstwo mutacji.
         pk (float): Prawdopodobienstwo krzyzowania.
     """
-    print()
-    print("Wybrane parametry:")
+    print("\nWybrane parametry:")
     print(f"{lch = }")
     print(f"{lg = }")
     print(f"{lpop = }")
-    print()
+    print(f"{pm = }")
+    print(f"{pk = }\n")
 
 
-def zapis(ocena_populacji, xp, iteracja, nazwa_pliku="hist_45430.dat"):
+def zapis(
+    iteracja,
+    ocena_populacji,
+    najlepszy_chromosom,
+    najlepsza_waga,
+    nazwa_pliku="hist_45430.dat",
+):
     """
     Zapisuje podstawowe statystyki oceny populacji do pliku.
     Argumenty:
@@ -106,14 +120,19 @@ def zapis(ocena_populacji, xp, iteracja, nazwa_pliku="hist_45430.dat"):
         iteracja (int): Numer iteracji.
         nazwa_pliku (str): Nazwa pliku do zapisu. Domyslnie 'hist_45430.dat'.
     """
-    min_fp = np.min(ocena_populacji)
-    max_fp = np.max(ocena_populacji)
-    srednia_fp = np.mean(ocena_populacji)
+
+    min_fp = round(np.min(ocena_populacji))
+    max_fp = round(np.max(ocena_populacji))
+    srednia_fp = round(np.mean(ocena_populacji), 2)
 
     with open(nazwa_pliku, "a", encoding="utf-8") as f:
-        f.write(f"{iteracja},{min_fp},{max_fp},{srednia_fp}")
-        for chromosom in xp.T:  # iterujemy po kolumnach, poniewaz xp to tablica 2D
-            f.write(f",{chromosom[1:].tolist()}")
+        f.write(
+            f"i={iteracja:03d}; min_fp={min_fp:03d}; max_fp={max_fp:03d}; srednia_fp={srednia_fp:.2f}"
+        )
+        if waga_max <= najlepsza_waga:
+            f.write(
+                f"; najlepszy_ch={najlepszy_chromosom.tolist()}; waga={najlepsza_waga:.2f}"
+            )
         f.write("\n")
 
 
@@ -138,7 +157,8 @@ def rodzice(xp, ocena_populacji, waga_populacji, waga_max):
         # Przekroczone obie wagi, szukamy blizszej
         if waga_ch1 > waga_max and waga_ch2 > waga_max:
             wybrany = (
-                ch1 if abs(waga_ch1 - waga_max) < abs(waga_ch2 - waga_max) else ch2
+                ch1 if abs(waga_ch1 - waga_max) < abs(waga_ch2 -
+                                                      waga_max) else ch2
             )
             # print(
             #     f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{wybrany + 1:02} wygral: wagi {waga_ch1, waga_ch2} > {waga_max}, ch{wybrany + 1:02} blizej waga_max."
@@ -207,7 +227,7 @@ def mutuj(xp, pm):
     return xp
 
 
-def potomek(xp, pk_zakres_poczatek, pk_zakres_koniec):
+def potomek(xp, pk):
     """
     Wykonuje krzyzowanie (crossover) pomiedzy chromosomami rodzicielskimi.
 
@@ -222,10 +242,11 @@ def potomek(xp, pk_zakres_poczatek, pk_zakres_koniec):
     xp_kopia = xp.copy()
 
     for i in range(0, lg - 1, 2):
-        prawdopodobienstwo = np.random.random()
-        if pk_zakres_poczatek <= prawdopodobienstwo <= pk_zakres_koniec:
+        p = np.random.random()
+        if p >= pk:
             punkt_ciecia = np.random.randint(1, xp.shape[0] - 1)
-            print(f"\nPara rodzicow: {i+1} i {i+2}, punkt ciecia: {punkt_ciecia}")
+            print(
+                f"\nPara rodzicow: {i+1} i {i+2}, punkt ciecia: {punkt_ciecia}")
             print(
                 f"Rodzice przed krzyzowaniem: ch{i+1}: {xp[:, i]}, ch{i+2}: {xp[:, i+1]}"
             )
@@ -277,8 +298,8 @@ def debug(xp, ocena_populacji, suma_wag_chromosomow, wartosci, wagi, waga_max):
 # WYKONYWANIA SKRYPTU GLOWNEGO
 if __name__ == "__main__":
     # Wczytanie parametrow algorytmu z klawiatury
-    (lch, lg, lpop) = wczytaj_z_klawiatury()
-    wyswietl_parametry(lch, lg, lpop)
+    (lch, lg, lpop, pm, pk) = wczytaj_z_klawiatury()
+    wyswietl_parametry(lch, lg, lpop, pm, pk)
 
     # Wczytanie danych z plikow
     (wartosci, wagi) = wczytaj_z_plikow(lg)
@@ -288,38 +309,33 @@ if __name__ == "__main__":
     xp = popinit(lg, lch)
     ocena_populacji, suma_wag_chromosomow = ocena(xp, wartosci, wagi[1:])
 
-    # Zapis poczatkowej populacji
-    zapis(ocena_populacji, xp, 0)
-
-    # Parametry mutacji i krzyzowania
-    PM = 0.1
-    PK_OD = 0.6
-    PK_DO = 1.0
-
     najlepszy_chromosom = None
     najlepsza_ocena = 0
     najlepsza_waga = 0
     najlepsza_iteracja = 0
+
+    with open("hist_45430.dat", "w", encoding="utf-8") as f:
+        f.write(
+            "iteracja;min_fp;max_fp;srednia_fp;najlepszy_chromosom;najlepsza_waga\n"
+        )
 
     # Glowna petla algorytmu
     for i in range(1, lpop + 1):
         print(f"\nIteracja {i}")
 
         # Selekcja rodzicow
-        indeksy_rodzicow = rodzice(xp, ocena_populacji, suma_wag_chromosomow, waga_max)
+        indeksy_rodzicow = rodzice(
+            xp, ocena_populacji, suma_wag_chromosomow, waga_max)
         xp = xp[indeksy_rodzicow]
 
         # Mutacja
-        xp = mutuj(xp, PM)
+        xp = mutuj(xp, pm)
 
         # Krzyzowanie
-        xp = potomek(xp, PK_OD, PK_DO)
+        xp = potomek(xp, pk)
 
         # Ocenianie populacji
         (ocena_populacji, suma_wag_chromosomow) = ocena(xp, wartosci, wagi[1:])
-
-        # Zapis stanu populacji
-        zapis(ocena_populacji, xp, i)
 
         # Aktualizacja najlepszego rozwiazania
         max_ocena_iteracji = np.max(ocena_populacji)
@@ -332,6 +348,8 @@ if __name__ == "__main__":
             najlepszy_chromosom = xp[max_index]
             najlepsza_waga = suma_wag_chromosomow[max_index]
             najlepsza_iteracja = i
+
+        zapis(i, ocena_populacji, najlepszy_chromosom, najlepsza_waga)
 
     # Wyswietlenie najlepszego rozwiazania
     print(f"Najlepszy chromosom: {najlepszy_chromosom}")
