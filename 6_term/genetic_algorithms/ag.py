@@ -109,7 +109,9 @@ def zapis(
     iteracja,
     ocena_populacji,
     najlepszy_chromosom,
+    najlepsza_ocena,
     najlepsza_waga,
+    znaleziono_nowy_najlepszy,
     nazwa_pliku="hist_45430.dat",
 ):
     """
@@ -129,9 +131,9 @@ def zapis(
         f.write(
             f"i={iteracja:03d}; min_fp={min_fp:03d}; max_fp={max_fp:03d}; srednia_fp={srednia_fp:.2f}"
         )
-        if waga_max <= najlepsza_waga:
+        if najlepszy_chromosom is not None and znaleziono_nowy_najlepszy is True:
             f.write(
-                f"; najlepszy_ch={najlepszy_chromosom.tolist()}; waga={najlepsza_waga:.2f}"
+                f"; najlepszy_ch={najlepszy_chromosom.tolist()}; fp={najlepsza_ocena}; waga={najlepsza_waga:.2f}"
             )
         f.write("\n")
 
@@ -313,10 +315,11 @@ if __name__ == "__main__":
     najlepsza_ocena = 0
     najlepsza_waga = 0
     najlepsza_iteracja = 0
+    znaleziono_nowy_najlepszy = False
 
     with open("hist_45430.dat", "w", encoding="utf-8") as f:
         f.write(
-            "iteracja;min_fp;max_fp;srednia_fp;najlepszy_chromosom;najlepsza_waga\n"
+            "iteracja;min_fp;max_fp;srednia_fp;najlepszy_chromosom;najlepsza_ocena;najlepsza_waga\n"
         )
 
     # Glowna petla algorytmu
@@ -348,8 +351,12 @@ if __name__ == "__main__":
             najlepszy_chromosom = xp[max_index]
             najlepsza_waga = suma_wag_chromosomow[max_index]
             najlepsza_iteracja = i
+            znaleziono_nowy_najlepszy = True
 
-        zapis(i, ocena_populacji, najlepszy_chromosom, najlepsza_waga)
+        zapis(i, ocena_populacji, najlepszy_chromosom,
+              najlepsza_ocena, najlepsza_waga, znaleziono_nowy_najlepszy)
+
+        znaleziono_nowy_najlepszy = False
 
     # Wyswietlenie najlepszego rozwiazania
     print(f"Najlepszy chromosom: {najlepszy_chromosom}")
