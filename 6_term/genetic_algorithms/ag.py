@@ -66,6 +66,8 @@ def wczytaj_z_klawiatury():
     # Liczba chromosomow w populacji
     lch = int(input("Podaj liczbe chromosomow w populacji (max. 50): "))
     lch = min(lch, 50)  # (max. 50)
+    if lch % 2 != 0:
+        lch += 1
 
     # Liczba genow w chromosomie
     lg = int(input("Podaj liczbe genow chromosomu (max. 10): "))
@@ -112,7 +114,7 @@ def zapis(
     najlepsza_ocena,
     najlepsza_waga,
     znaleziono_nowy_najlepszy,
-    nazwa_pliku="hist_45430.dat",
+    nazwa_pliku="45430-hist.txt",
 ):
     """
     Zapisuje podstawowe statystyki oceny populacji do pliku.
@@ -120,7 +122,7 @@ def zapis(
         ocena_populacji (np.array): Oceny chromosomow w populacji.
         xp (np.array): Populacja chromosomow.
         iteracja (int): Numer iteracji.
-        nazwa_pliku (str): Nazwa pliku do zapisu. Domyslnie 'hist_45430.dat'.
+        nazwa_pliku (str): Nazwa pliku do zapisu. Domyslnie '45430-hist.txt'.
     """
 
     min_fp = round(np.min(ocena_populacji))
@@ -159,8 +161,7 @@ def rodzice(xp, ocena_populacji, waga_populacji, waga_max):
         # Przekroczone obie wagi, szukamy blizszej
         if waga_ch1 > waga_max and waga_ch2 > waga_max:
             wybrany = (
-                ch1 if abs(waga_ch1 - waga_max) < abs(waga_ch2 -
-                                                      waga_max) else ch2
+                ch1 if abs(waga_ch1 - waga_max) < abs(waga_ch2 - waga_max) else ch2
             )
             # print(
             #     f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{wybrany + 1:02} wygral: wagi {waga_ch1, waga_ch2} > {waga_max}, ch{wybrany + 1:02} blizej waga_max."
@@ -232,34 +233,27 @@ def mutuj(xp, pm):
 def potomek(xp, pk):
     """
     Wykonuje krzyzowanie (crossover) pomiedzy chromosomami rodzicielskimi.
-
     Argumenty:
         xp (np.array): Populacja chromosomow.
         pk (float): Prawdopodobienstwo krzyzowania.
-
     Zwraca:
         np.array: Populacja po krzyzowaniu.
     """
     lg = xp.shape[1]
     xp_kopia = xp.copy()
 
-    for i in range(0, lg - 1, 2):
+    for i in range(0, len(xp) - 1, 2):
         p = np.random.random()
-        if p >= pk:
-            punkt_ciecia = np.random.randint(1, xp.shape[0] - 1)
-            print(
-                f"\nPara rodzicow: {i+1} i {i+2}, punkt ciecia: {punkt_ciecia}")
-            print(
-                f"Rodzice przed krzyzowaniem: ch{i+1}: {xp[:, i]}, ch{i+2}: {xp[:, i+1]}"
-            )
-            # Krzyzowanie jednopunktowe
-            xp_kopia[punkt_ciecia:, i], xp_kopia[punkt_ciecia:, i + 1] = (
-                xp[punkt_ciecia:, i + 1],
-                xp[punkt_ciecia:, i],
-            )
-            print(
-                f"Rodzice po krzyzowaniu: ch{i+1}: {xp_kopia[:, i]}, ch{i+2}: {xp_kopia[:, i+1]}"
-            )
+        if p < pk:
+            if lg > 1:
+                punkt_ciecia = np.random.randint(1, lg)
+                xp_kopia[i, punkt_ciecia:], xp_kopia[i + 1, punkt_ciecia:] = (
+                    xp[i + 1, punkt_ciecia:].copy(),
+                    xp[i, punkt_ciecia:].copy(),
+                )
+            else:
+                # Jeśli lg <= 1, nie wykonujemy krzyżowania
+                xp_kopia[i], xp_kopia[i + 1] = xp[i], xp[i + 1]
 
     return xp_kopia
 
@@ -317,18 +311,17 @@ if __name__ == "__main__":
     najlepsza_iteracja = 0
     znaleziono_nowy_najlepszy = False
 
-    with open("hist_45430.dat", "w", encoding="utf-8") as f:
+    with open("45430-hist.txt", "w", encoding="utf-8") as f:
         f.write(
             "iteracja;min_fp;max_fp;srednia_fp;najlepszy_chromosom;najlepsza_ocena;najlepsza_waga\n"
         )
 
     # Glowna petla algorytmu
     for i in range(1, lpop + 1):
-        print(f"\nIteracja {i}")
+        # print(f"\nIteracja {i}")
 
         # Selekcja rodzicow
-        indeksy_rodzicow = rodzice(
-            xp, ocena_populacji, suma_wag_chromosomow, waga_max)
+        indeksy_rodzicow = rodzice(xp, ocena_populacji, suma_wag_chromosomow, waga_max)
         xp = xp[indeksy_rodzicow]
 
         # Mutacja
@@ -341,20 +334,28 @@ if __name__ == "__main__":
         (ocena_populacji, suma_wag_chromosomow) = ocena(xp, wartosci, wagi[1:])
 
         # Aktualizacja najlepszego rozwiazania
-        max_ocena_iteracji = np.max(ocena_populacji)
-        max_index = np.argmax(ocena_populacji)
-        if (
-            max_ocena_iteracji > najlepsza_ocena
-            and suma_wag_chromosomow[max_index] <= waga_max
-        ):
-            najlepsza_ocena = max_ocena_iteracji
-            najlepszy_chromosom = xp[max_index]
-            najlepsza_waga = suma_wag_chromosomow[max_index]
-            najlepsza_iteracja = i
-            znaleziono_nowy_najlepszy = True
+        prawidlowe_indeksy = np.where(suma_wag_chromosomow <= waga_max)[0]
+        if prawidlowe_indeksy.size > 0:
+            maksymalny_indeks = prawidlowe_indeksy[
+                np.argmax(ocena_populacji[prawidlowe_indeksy])
+            ]
+            if ocena_populacji[maksymalny_indeks] > najlepsza_ocena:
+                najlepsza_ocena = ocena_populacji[maksymalny_indeks]
+                najlepszy_chromosom = xp[maksymalny_indeks]
+                najlepsza_waga = suma_wag_chromosomow[maksymalny_indeks]
+                najlepsza_iteracja = i
+                znaleziono_nowy_najlepszy = True
 
-        zapis(i, ocena_populacji, najlepszy_chromosom,
-              najlepsza_ocena, najlepsza_waga, znaleziono_nowy_najlepszy)
+        zapis(
+            i,
+            ocena_populacji,
+            najlepszy_chromosom,
+            najlepsza_ocena,
+            najlepsza_waga,
+            znaleziono_nowy_najlepszy,
+        )
+
+        znaleziono_nowy_najlepszy = False
 
         znaleziono_nowy_najlepszy = False
 
