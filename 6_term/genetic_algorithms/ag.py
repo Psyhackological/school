@@ -161,7 +161,8 @@ def rodzice(xp, ocena_populacji, waga_populacji, waga_max):
         # Przekroczone obie wagi, szukamy blizszej
         if waga_ch1 > waga_max and waga_ch2 > waga_max:
             wybrany = (
-                ch1 if abs(waga_ch1 - waga_max) < abs(waga_ch2 - waga_max) else ch2
+                ch1 if abs(waga_ch1 - waga_max) < abs(waga_ch2 -
+                                                      waga_max) else ch2
             )
             # print(
             #     f"ch{ch1 + 1:02} vs ch{ch2 + 1:02} -> ch{wybrany + 1:02} wygral: wagi {waga_ch1, waga_ch2} > {waga_max}, ch{wybrany + 1:02} blizej waga_max."
@@ -321,7 +322,8 @@ if __name__ == "__main__":
         # print(f"\nIteracja {i}")
 
         # Selekcja rodzicow
-        indeksy_rodzicow = rodzice(xp, ocena_populacji, suma_wag_chromosomow, waga_max)
+        indeksy_rodzicow = rodzice(
+            xp, ocena_populacji, suma_wag_chromosomow, waga_max)
         xp = xp[indeksy_rodzicow]
 
         # Mutacja
@@ -354,8 +356,6 @@ if __name__ == "__main__":
             najlepsza_waga,
             znaleziono_nowy_najlepszy,
         )
-
-        znaleziono_nowy_najlepszy = False
 
         znaleziono_nowy_najlepszy = False
 
