@@ -79,11 +79,11 @@ def wczytaj_z_klawiatury():
 
     # Prawdopodobienstwo populacji
     pm = float(input("Podaj prawdopodobienstwo mutacji (0 - 0.1): "))
-    pm = min(lpop, 0.1)  # (max. 0.1)
+    pm = min(pm, 0.1)  # (max. 0.1)
 
     # Prawdopodobienstwo populacji
     pk = float(input("Podaj prawdopodobienstwo krzyzowania (0.6 - 1.0): "))
-    pk = min(lpop, 0.8)  # (max. 1.0 ale wzialem srodek)
+    pk = min(pk, 0.8)  # (max. 1.0 ale wzialem srodek)
 
     return (lch, lg, lpop, pm, pk)
 
