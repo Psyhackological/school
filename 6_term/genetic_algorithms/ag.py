@@ -113,18 +113,8 @@ def zapis(
     najlepszy_chromosom,
     najlepsza_ocena,
     najlepsza_waga,
-    znaleziono_nowy_najlepszy,
-    nazwa_pliku="45430-hist.txt",
+    nazwa_pliku="45430-wynik.txt",
 ):
-    """
-    Zapisuje podstawowe statystyki oceny populacji do pliku.
-    Argumenty:
-        ocena_populacji (np.array): Oceny chromosomow w populacji.
-        xp (np.array): Populacja chromosomow.
-        iteracja (int): Numer iteracji.
-        nazwa_pliku (str): Nazwa pliku do zapisu. Domyslnie '45430-hist.txt'.
-    """
-
     min_fp = round(np.min(ocena_populacji))
     max_fp = round(np.max(ocena_populacji))
     srednia_fp = round(np.mean(ocena_populacji), 2)
@@ -133,7 +123,7 @@ def zapis(
         f.write(
             f"i={iteracja:03d}; min_fp={min_fp:03d}; max_fp={max_fp:03d}; srednia_fp={srednia_fp:.2f}"
         )
-        if najlepszy_chromosom is not None and znaleziono_nowy_najlepszy is True:
+        if najlepszy_chromosom is not None:
             f.write(
                 f"; najlepszy_ch={najlepszy_chromosom.tolist()}; fp={najlepsza_ocena}; waga={najlepsza_waga:.2f}"
             )
@@ -319,8 +309,6 @@ if __name__ == "__main__":
 
     # Glowna petla algorytmu
     for i in range(1, lpop + 1):
-        # print(f"\nIteracja {i}")
-
         # Selekcja rodzicow
         indeksy_rodzicow = rodzice(
             xp, ocena_populacji, suma_wag_chromosomow, waga_max)
@@ -335,29 +323,34 @@ if __name__ == "__main__":
         # Ocenianie populacji
         (ocena_populacji, suma_wag_chromosomow) = ocena(xp, wartosci, wagi[1:])
 
-        # Aktualizacja najlepszego rozwiazania
+        # Aktualizacja najlepszego rozwiazania w iteracji
         prawidlowe_indeksy = np.where(suma_wag_chromosomow <= waga_max)[0]
         if prawidlowe_indeksy.size > 0:
             maksymalny_indeks = prawidlowe_indeksy[
                 np.argmax(ocena_populacji[prawidlowe_indeksy])
             ]
-            if ocena_populacji[maksymalny_indeks] > najlepsza_ocena:
-                najlepsza_ocena = ocena_populacji[maksymalny_indeks]
-                najlepszy_chromosom = xp[maksymalny_indeks]
-                najlepsza_waga = suma_wag_chromosomow[maksymalny_indeks]
-                najlepsza_iteracja = i
-                znaleziono_nowy_najlepszy = True
+            najlepszy_chromosom_w_iteracji = xp[maksymalny_indeks]
+            najlepsza_ocena_w_iteracji = ocena_populacji[maksymalny_indeks]
+            najlepsza_waga_w_iteracji = suma_wag_chromosomow[maksymalny_indeks]
 
+            # Aktualizacja najlepszego rozwiazania ogolem
+            if (najlepsza_ocena_w_iteracji > najlepsza_ocena) or (
+                najlepsza_ocena_w_iteracji == najlepsza_ocena
+                and najlepsza_waga_w_iteracji < najlepsza_waga
+            ):
+                najlepsza_ocena = najlepsza_ocena_w_iteracji
+                najlepszy_chromosom = najlepszy_chromosom_w_iteracji
+                najlepsza_waga = najlepsza_waga_w_iteracji
+                najlepsza_iteracja = i
+
+        # Zapis wynikow iteracji
         zapis(
             i,
             ocena_populacji,
-            najlepszy_chromosom,
-            najlepsza_ocena,
-            najlepsza_waga,
-            znaleziono_nowy_najlepszy,
+            najlepszy_chromosom_w_iteracji,
+            najlepsza_ocena_w_iteracji,
+            najlepsza_waga_w_iteracji,
         )
-
-        znaleziono_nowy_najlepszy = False
 
     # Wyswietlenie najlepszego rozwiazania
     print(f"Najlepszy chromosom: {najlepszy_chromosom}")
